@@ -1,0 +1,19 @@
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import pinoHttp from "pino-http";
+import { healthRouter } from "../modules/health/health.routes";
+
+export function createServer() {
+  const app = express();
+
+  app.use(helmet());
+  app.use(cors());
+  app.use(express.json({ limit: "1mb" }));
+  app.use(pinoHttp());
+
+  app.get("/", (_req, res) => res.json({ ok: true, service: "server" }));
+  app.use("/health", healthRouter);
+
+  return app;
+}
