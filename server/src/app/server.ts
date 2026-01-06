@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
 import { healthRouter } from "../modules/health/health.routes";
+import { errorHandler } from "./errors/error-handler";
 
 export function createServer() {
   const app = express();
@@ -15,5 +16,6 @@ export function createServer() {
   app.get("/", (_req, res) => res.json({ ok: true, service: "server" }));
   app.use("/health", healthRouter);
 
+  app.use(errorHandler);
   return app;
 }
