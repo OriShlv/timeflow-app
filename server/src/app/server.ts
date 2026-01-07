@@ -4,6 +4,7 @@ import helmet from "helmet";
 import pinoHttp from "pino-http";
 import { healthRouter } from "../modules/health/health.routes";
 import { errorHandler } from "./errors/error-handler";
+import { dbcheckRouter } from "../modules/dbcheck/dbcheck.routes";
 
 export function createServer() {
   const app = express();
@@ -16,6 +17,7 @@ export function createServer() {
   app.get("/", (_req, res) => res.json({ ok: true, service: "server" }));
   app.use("/health", healthRouter);
 
+  app.use("/dbcheck", dbcheckRouter);
   app.use(errorHandler);
   return app;
 }
