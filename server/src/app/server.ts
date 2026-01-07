@@ -5,6 +5,8 @@ import pinoHttp from "pino-http";
 import { healthRouter } from "../modules/health/health.routes";
 import { errorHandler } from "./errors/error-handler";
 import { dbcheckRouter } from "../modules/dbcheck/dbcheck.routes";
+import { authRouter } from "../modules/auth/auth.routes";
+import { usersRouter } from "../modules/users/users.routes";
 
 export function createServer() {
   const app = express();
@@ -18,6 +20,8 @@ export function createServer() {
   app.use("/health", healthRouter);
 
   app.use("/dbcheck", dbcheckRouter);
+  app.use("/auth", authRouter);
+  app.use("/", usersRouter);
   app.use(errorHandler);
   return app;
 }
