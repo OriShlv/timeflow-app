@@ -51,6 +51,11 @@ model TaskEvent {
   payload   Json?
   createdAt DateTime @default(now())
 
+  dedupeKey   String?  @unique
+  processedAt DateTime?
+  attempts    Int      @default(0)
+  lastError   String?
+
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
 

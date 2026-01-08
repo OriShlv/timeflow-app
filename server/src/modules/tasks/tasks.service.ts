@@ -1,5 +1,6 @@
 import { prisma } from "../../db/prisma";
 import { TaskStatus } from "@prisma/client";
+import { publishEvent } from "../../events/publisher";
 
 type ListParams = {
     userId: string;
@@ -14,7 +15,7 @@ type ListParams = {
 };
 
 export async function createTask(userId: string, data: { title: string; description?: string; dueAt?: Date }) {
-    return prisma.task.create({
+    const task = await prisma.task.create({
         data: {
             userId,
             title: data.title,
@@ -30,6 +31,16 @@ export async function createTask(userId: string, data: { title: string; descript
             createdAt: true,
             updatedAt: true
         }
+    });
+
+    await createAndPublishTaskEvent({
+        userId,
+        taskId: task.id,
+        type: "TASK_CREATED",
+        payload: {
+            title: task.title,
+        },
+        dedupeKey: `TASK_CREATED:${task.id}`
     });
 }
 
@@ -97,7 +108,9 @@ export async function updateTask(userId: string, taskId: string, data: any) {
         return null;
     }
 
-    return prisma.task.update({
+    const nextStatus = data.status as TaskStatus | undefined;
+
+    const updatedTask = await prisma.task.update({
         where: { id: taskId },
         data,
         select: {
@@ -110,6 +123,18 @@ export async function updateTask(userId: string, taskId: string, data: any) {
             updatedAt: true
         }
     });
+
+    if (existing.status !== "DONE" && nextStatus === "DONE") {
+        await createAndPublishTaskEvent({
+            userId,
+            taskId: taskId,
+            type: "TASK_COMPLETED",
+            payload: { from: existing.status, to: "DONE" },
+            dedupeKey: `TASK_COMPLETED:${taskId}`
+        });
+    }
+
+    return updatedTask;
 }
 
 export async function deleteTask(userId: string, taskId: string) {
@@ -120,4 +145,35 @@ export async function deleteTask(userId: string, taskId: string) {
 
     await prisma.task.delete({ where: { id: taskId } });
     return true;
+}
+
+async function createAndPublishTaskEvent(params: {
+    userId: string;
+    taskId?: string;
+    type: string;
+    payload?: any;
+    dedupeKey?: string;
+}) {
+    // If dedupeKey is exists, try ro create an event. If exists one, we will not repost the event.
+    try {
+        const ev = await prisma.taskEvent.create({
+            data: {
+                userId: params.userId,
+                taskId: params.taskId,
+                type: params.type,
+                payload: params.payload,
+                dedupeKey: params.dedupeKey
+            },
+            select: { id: true, type: true }
+        });
+
+        await publishEvent({ eventId: ev.id, type: ev.type });
+        return ev;
+    } catch (e: any) {
+        // unique violation is already exist on dedupeKey: event
+        if (e?.code === "P2002") {
+            return null;
+        }
+        throw e;
+    }
 }
