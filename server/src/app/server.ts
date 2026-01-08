@@ -7,6 +7,7 @@ import { errorHandler } from "./errors/error-handler";
 import { dbcheckRouter } from "../modules/dbcheck/dbcheck.routes";
 import { authRouter } from "../modules/auth/auth.routes";
 import { usersRouter } from "../modules/users/users.routes";
+import { tasksRouter } from "../modules/tasks/tasks.routes";
 
 export function createServer() {
   const app = express();
@@ -18,10 +19,11 @@ export function createServer() {
 
   app.get("/", (_req, res) => res.json({ ok: true, service: "server" }));
   app.use("/health", healthRouter);
-
   app.use("/dbcheck", dbcheckRouter);
   app.use("/auth", authRouter);
   app.use("/", usersRouter);
+  app.use("/tasks", tasksRouter);
   app.use(errorHandler);
+
   return app;
 }
