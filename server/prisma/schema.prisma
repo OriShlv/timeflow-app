@@ -37,6 +37,10 @@ model Task {
 
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   events      TaskEvent[]
+
+  @@index([userId, createdAt])
+  @@index([userId, status])
+  @@index([userId, dueAt])
 }
 
 model TaskEvent {
