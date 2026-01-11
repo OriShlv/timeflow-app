@@ -8,6 +8,7 @@ import { dbcheckRouter } from "../modules/dbcheck/dbcheck.routes";
 import { authRouter } from "../modules/auth/auth.routes";
 import { usersRouter } from "../modules/users/users.routes";
 import { tasksRouter } from "../modules/tasks/tasks.routes";
+import { analyticsRouter } from "../modules/analytics/analytics.routes";
 
 export function createServer() {
   const app = express();
@@ -23,6 +24,7 @@ export function createServer() {
   app.use("/auth", authRouter);
   app.use("/", usersRouter);
   app.use("/tasks", tasksRouter);
+  app.use("/analytics", analyticsRouter);
   app.use(errorHandler);
 
   return app;
