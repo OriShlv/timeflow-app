@@ -14,17 +14,19 @@ enum TaskStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String?
-  passwordHash String
-createdAt      DateTime @default(now())
-updatedAt      DateTime @updatedAt
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String?
+  passwordHash    String
+createdAt         DateTime @default(now())
+updatedAt         DateTime @updatedAt
 
-  tasks        Task[]
-  events       TaskEvent[]
-  dailyStats   DailyUserStats[]
+  tasks           Task[]
+  events          TaskEvent[]
+  dailyStats      DailyUserStats[]
   recommendations UserRecommendation[]
+  dailyFeatures   DailyUserFeatures[]
+
 }
 
 model Task {
@@ -98,4 +100,30 @@ model UserRecommendation {
   @@unique([userId, type])
   @@index([userId, score])
   @@index([expiresAt])
+}
+
+model DailyUserFeatures {
+  id                 String   @id @default(cuid())
+  userId             String
+  day                DateTime
+
+  createdCount       Int      @default(0)
+  completedCount     Int      @default(0)
+  completionRate     Float    @default(0)
+
+  tasksWithDueAt     Int      @default(0)
+  overdueCount       Int      @default(0)
+
+  avgCompletionLagH  Float    @default(0) // זמן ממוצע משעת יצירה עד השלמה, שעות
+  createdMorning     Int      @default(0) // 05-11 UTC
+  createdAfternoon   Int      @default(0) // 12-17 UTC
+  createdEvening     Int      @default(0) // 18-23 UTC
+  createdNight       Int      @default(0) // 00-04 UTC
+
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+  @@index([day])
+  @@index([userId, day])
 }
