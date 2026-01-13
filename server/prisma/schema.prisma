@@ -24,6 +24,7 @@ updatedAt      DateTime @updatedAt
   tasks        Task[]
   events       TaskEvent[]
   dailyStats   DailyUserStats[]
+  recommendations UserRecommendation[]
 }
 
 model Task {
@@ -79,4 +80,22 @@ model DailyUserStats {
   @@unique([userId, day])
   @@index([day])
   @@index([userId, day])  
+}
+
+model UserRecommendation {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  score     Float    @default(0)
+  message   String
+  evidence  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@index([userId, score])
+  @@index([expiresAt])
 }
