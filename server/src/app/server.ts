@@ -10,6 +10,7 @@ import { usersRouter } from "../modules/users/users.routes";
 import { tasksRouter } from "../modules/tasks/tasks.routes";
 import { analyticsRouter } from "../modules/analytics/analytics.routes";
 import { recommendationsRouter } from "../modules/recommendations/recommendations.routes";
+import { featuresRouter } from "../modules/features/features.routes";
 
 export function createServer() {
   const app = express();
@@ -27,6 +28,7 @@ export function createServer() {
   app.use("/tasks", tasksRouter);
   app.use("/analytics", analyticsRouter);
   app.use("/recommendations", recommendationsRouter);
+  app.use("/features", featuresRouter);
   app.use(errorHandler);
 
   return app;
