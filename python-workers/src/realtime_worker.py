@@ -4,6 +4,7 @@ from datetime import datetime, timezone, timedelta, date
 
 import redis
 import psycopg
+import time
 from dotenv import load_dotenv
 import numpy as np
 from sklearn.cluster import KMeans
@@ -17,6 +18,15 @@ REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 STREAM = "timeflow.events"
 GROUP = "realtime-features"
 CONSUMER = os.environ.get("WORKER_NAME", "worker-1")
+DLQ_STREAM = "timeflow.events.dlq"
+
+BLOCK_MS = 5000
+BATCH_COUNT = 10
+HEARTBEAT_EVERY_SEC = 10
+HEARTBEAT_TTL_SEC = 30
+
+MAX_RETRIES = 5
+ATTEMPTS_TTL_SEC = 3600
 
 def utc_day_start(dt: datetime) -> datetime:
     d = dt.date()
@@ -249,8 +259,14 @@ def main():
     print(f"[realtime] group={GROUP} created successfully", flush=True)
 
     with psycopg.connect(DATABASE_URL) as conn:
+        last_hb = 0
         while True:
-            resp = r.xreadgroup(GROUP, CONSUMER, {STREAM: ">"}, count=10, block=5000)
+            now = time.time()
+            if now - last_hb > HEARTBEAT_EVERY_SEC:
+                r.set(f"timeflow:worker:{CONSUMER}:heartbeat", datetime.now(timezone.utc).isoformat(), ex=HEARTBEAT_TTL_SEC)
+                last_hb = now
+
+            resp = r.xreadgroup(GROUP, CONSUMER, {STREAM: ">"}, count=BATCH_COUNT, block=BLOCK_MS)
             if not resp:
                 continue
 
@@ -262,8 +278,17 @@ def main():
                         r.xack(STREAM, GROUP, msg_id)
                     except Exception as e:
                         conn.rollback()
-                        # leave unacked for retry, but log
-                        print("[realtime] error", msg_id, e)
+                        attempts_key = f"timeflow:attempts:{msg_id}"
+                        attempts = r.incr(attempts_key)
+                        r.expire(attempts_key, ATTEMPTS_TTL_SEC)
+
+                        if attempts >= MAX_RETRIES:
+                            r.xadd(DLQ_STREAM, "*", {"msgId": msg_id, **kv, "error": str(e)})
+                            r.xack(STREAM, GROUP, msg_id)
+                            print("[realtime] moved to DLQ", msg_id, str(e))
+                        else:
+                            print("[realtime] retry later", msg_id, "attempt", attempts, str(e))
+
 
 if __name__ == "__main__":
     main()
