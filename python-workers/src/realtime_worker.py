@@ -20,10 +20,15 @@ GROUP = "realtime-features"
 CONSUMER = os.environ.get("WORKER_NAME", "worker-1")
 DLQ_STREAM = "timeflow.events.dlq"
 
+WORKERS_SET = "timeflow:workers"
+HEARTBEAT_KEY_PREFIX = "timeflow:worker:"
+HEARTBEAT_SUFFIX = ":heartbeat"
+
 BLOCK_MS = 5000
 BATCH_COUNT = 10
 HEARTBEAT_EVERY_SEC = 10
 HEARTBEAT_TTL_SEC = 30
+PRUNE_INTERVAL_SEC = 60
 
 MAX_RETRIES = 5
 ATTEMPTS_TTL_SEC = 3600
@@ -244,6 +249,17 @@ def recompute_segment_for_user(conn, user_id: str, days: int = 30, k: int = 3):
             ),
         )
 
+def prune_dead_workers(r: redis.Redis):
+    workers = r.smembers(WORKERS_SET)
+    if not workers:
+        return
+    keys = [f"{HEARTBEAT_KEY_PREFIX}{w}{HEARTBEAT_SUFFIX}" for w in workers]
+    vals = r.mget(keys)
+    dead = [w for w, v in zip(workers, vals) if v is None]
+    if dead:
+        r.srem(WORKERS_SET, *dead)
+        print(f"[realtime] pruned dead workers: {dead}")
+
 def handle_message(conn, fields: dict):
     user_id = fields["userId"]
     created_at = parse_iso(fields["createdAt"])
@@ -256,15 +272,24 @@ def main():
     print(f"[realtime] up consumer={CONSUMER} group={GROUP} stream={STREAM}", flush=True)
     r = redis.Redis.from_url(REDIS_URL, decode_responses=True)
     ensure_group(r)
-    print(f"[realtime] group={GROUP} created successfully", flush=True)
+    r.sadd(WORKERS_SET, CONSUMER)
 
     with psycopg.connect(DATABASE_URL) as conn:
         last_hb = 0
+        last_prune = 0
         while True:
             now = time.time()
             if now - last_hb > HEARTBEAT_EVERY_SEC:
-                r.set(f"timeflow:worker:{CONSUMER}:heartbeat", datetime.now(timezone.utc).isoformat(), ex=HEARTBEAT_TTL_SEC)
+                r.set(
+                    f"{HEARTBEAT_KEY_PREFIX}{CONSUMER}{HEARTBEAT_SUFFIX}",
+                    datetime.now(timezone.utc).isoformat(),
+                    ex=HEARTBEAT_TTL_SEC,
+                )
                 last_hb = now
+
+            if now - last_prune >= PRUNE_INTERVAL_SEC:
+                prune_dead_workers(r)
+                last_prune = now
 
             resp = r.xreadgroup(GROUP, CONSUMER, {STREAM: ">"}, count=BATCH_COUNT, block=BLOCK_MS)
             if not resp:
