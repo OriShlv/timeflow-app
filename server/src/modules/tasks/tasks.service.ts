@@ -1,6 +1,6 @@
 import { prisma } from "../../db/prisma";
 import { TaskStatus } from "@prisma/client";
-import { publishEvent } from "../../events/publisher";
+import { publishEventById } from "../../events/publisher";
 
 type ListParams = {
     userId: string;
@@ -167,7 +167,7 @@ async function createAndPublishTaskEvent(params: {
             select: { id: true, type: true }
         });
 
-        await publishEvent({ eventId: ev.id, type: ev.type });
+        await publishEventById(ev.id);
         return ev;
     } catch (e: any) {
         // unique violation is already exist on dedupeKey: event

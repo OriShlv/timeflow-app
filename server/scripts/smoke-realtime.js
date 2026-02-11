@@ -29,8 +29,8 @@ async function run() {
     }
 
     if (body.health.dlqHasItems) {
-    console.error("Smoke test warning: DLQ has items");
-    process.exit(1);
+        console.error("Smoke test warning: DLQ has items");
+        process.exit(1);
     }
 
     console.log("Realtime smoke test OK");
