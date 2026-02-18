@@ -42,6 +42,8 @@ export async function createTask(userId: string, data: { title: string; descript
         },
         dedupeKey: `TASK_CREATED:${task.id}`
     });
+
+    return task;
 }
 
 export async function listTasks(params: ListParams) {
