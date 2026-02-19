@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 from datetime import datetime, timezone, timedelta, date
 
 import redis
@@ -130,6 +131,7 @@ def upsert_daily_features_for_user_day(conn, user_id: str, day_start: datetime):
         cur.execute(
             """
             INSERT INTO "DailyUserFeatures" (
+              "id",
               "userId", day,
               "createdCount","completedCount","completionRate",
               "tasksWithDueAt","overdueCount",
@@ -137,7 +139,7 @@ def upsert_daily_features_for_user_day(conn, user_id: str, day_start: datetime):
               "createdMorning","createdAfternoon","createdEvening","createdNight",
               "updatedAt"
             )
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, now())
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, now())
             ON CONFLICT ("userId", day)
             DO UPDATE SET
               "createdCount"=EXCLUDED."createdCount",
@@ -153,6 +155,7 @@ def upsert_daily_features_for_user_day(conn, user_id: str, day_start: datetime):
               "updatedAt"=now()
             """,
             (
+                str(uuid.uuid4()),
                 user_id, day_start,
                 created_count, completed_count, completion_rate,
                 tasks_with_due, overdue_count,
@@ -230,8 +233,8 @@ def recompute_segment_for_user(conn, user_id: str, days: int = 30, k: int = 3):
 
         cur.execute(
             """
-            INSERT INTO "UserSegment" ("userId", segment, label, centroid, "featuresRef", "updatedAt")
-            VALUES (%s,%s,%s,%s::jsonb,%s::jsonb, now())
+            INSERT INTO "UserSegment" ("id", "userId", segment, label, centroid, "featuresRef", "updatedAt")
+            VALUES (%s,%s,%s,%s,%s::jsonb,%s::jsonb, now())
             ON CONFLICT ("userId")
             DO UPDATE SET
               segment=EXCLUDED.segment,
@@ -241,6 +244,7 @@ def recompute_segment_for_user(conn, user_id: str, days: int = 30, k: int = 3):
               "updatedAt"=now()
             """,
             (
+                str(uuid.uuid4()),
                 user_id,
                 segment,
                 label,

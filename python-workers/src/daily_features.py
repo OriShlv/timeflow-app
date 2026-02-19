@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timezone, timedelta, date
+import uuid
 
 import psycopg
 from dotenv import load_dotenv
@@ -100,13 +101,14 @@ def compute_for_day(conn, day: date):
             cur.execute(
                 """
                 INSERT INTO "DailyUserFeatures" (
+                  "id",
                   "userId", day,
                   "createdCount", "completedCount", "completionRate",
                   "tasksWithDueAt", "overdueCount",
                   "avgCompletionLagH",
                   "createdMorning", "createdAfternoon", "createdEvening", "createdNight"
                 )
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                 ON CONFLICT ("userId", day)
                 DO UPDATE SET
                   "createdCount" = EXCLUDED."createdCount",
@@ -122,6 +124,7 @@ def compute_for_day(conn, day: date):
                   "updatedAt" = now()
                 """,
                 (
+                    str(uuid.uuid4()),
                     user_id, start,
                     created_count, completed_count, completion_rate,
                     tasks_with_due, overdue_count,
