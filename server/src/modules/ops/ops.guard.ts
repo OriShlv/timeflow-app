@@ -1,11 +1,12 @@
-import type { Request, Response, NextFunction } from "express";
-import { env } from "../../config/env";
+import type { Request, Response, NextFunction } from 'express';
+import { env } from '../../config/env';
+import type { AuthedRequest } from '../../app/middleware/require-auth';
 
 function parseAllowlist(s: string | undefined) {
-    return (s ?? "")
-        .split(",")
-        .map((x) => x.trim().toLowerCase())
-        .filter(Boolean);
+  return (s ?? '')
+    .split(',')
+    .map((x) => x.trim().toLowerCase())
+    .filter(Boolean);
 }
 
 export function requireOpsAccess() {
@@ -13,30 +14,30 @@ export function requireOpsAccess() {
 
   return (req: Request, res: Response, next: NextFunction) => {
     if (!env.OPS_ENABLED) {
-        return res.status(404).json({ ok: false, error: "Not Found" });
+      return res.status(404).json({ ok: false, error: 'Not Found' });
     }
 
     // Dev-only mode
     if (env.OPS_DEV_ONLY) {
-      if (env.NODE_ENV !== "development") {
-        return res.status(403).json({ ok: false, error: "Forbidden" });
+      if (env.NODE_ENV !== 'development') {
+        return res.status(403).json({ ok: false, error: 'Forbidden' });
       }
       return next();
     }
 
     // JWT mode: require req.user
-    const user = (req as any).user as { email?: string } | undefined;
+    const user = (req as AuthedRequest).user;
     if (!user?.email) {
-      return res.status(401).json({ ok: false, error: "Unauthorized" });
+      return res.status(401).json({ ok: false, error: 'Unauthorized' });
     }
 
     if (allowlist.length === 0) {
-      return res.status(500).json({ ok: false, error: "OPS allowlist not configured" });
+      return res.status(500).json({ ok: false, error: 'OPS allowlist not configured' });
     }
 
     const email = user.email.toLowerCase();
     if (!allowlist.includes(email)) {
-      return res.status(403).json({ ok: false, error: "Forbidden" });
+      return res.status(403).json({ ok: false, error: 'Forbidden' });
     }
 
     return next();

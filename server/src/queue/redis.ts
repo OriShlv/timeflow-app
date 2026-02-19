@@ -1,16 +1,15 @@
-import Redis from "ioredis";
-import { env } from "../config/env";
+import Redis from 'ioredis';
+import { env } from '../config/env';
 
 export const redis = new Redis(env.REDIS_URL, {
-    maxRetriesPerRequest: 3
+  maxRetriesPerRequest: 3,
 });
 
-redis.on("error", (err) => {
-    // eslint-disable-next-line no-console
-    console.error("[redis] error", err?.message ?? err);
-  });
-  redis.on("connect", () => {
-    // eslint-disable-next-line no-console
-    console.log("[redis] connected");
-  });
-  
+redis.on('error', (err) => {
+  // eslint-disable-next-line no-console
+  console.error('[redis] error', err?.message ?? err);
+});
+redis.on('connect', () => {
+  // eslint-disable-next-line no-console
+  console.log('[redis] connected');
+});

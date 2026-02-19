@@ -69,12 +69,26 @@ The API will be available on `http://localhost:<PORT>` (see `server/src/config/e
 
 ```bash
 cd python-workers
-cp .env.example .env   # configure Redis / DB connection as needed
-pip install -r requirements.txt
-python -m workers.analytics   # example entrypoint
+cp .env.example .env   # configure DATABASE_URL / REDIS_URL as needed
+python -m venv .venv
+source .venv/bin/activate      # On Windows: .venv\Scripts\activate
+pip install -r requirements.lock.txt
 ```
 
-Workers listen to Redis Streams and compute analytics and insights.
+Now you can run the workers, for example:
+
+```bash
+# Realtime Redis Streams consumer
+python src/realtime_worker.py
+
+# Batch jobs (can be scheduled)
+python src/daily_stats.py
+python src/daily_features.py
+python src/recommendations_v1.py
+python src/cluster_users.py
+```
+
+Workers listen to Redis Streams and Postgres, compute analytics/insights, and write back to the database.
 
 ---
 
