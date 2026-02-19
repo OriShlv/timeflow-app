@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { HttpError } from "./http-error";
 
 export function errorHandler(
     err: unknown,
@@ -6,6 +7,22 @@ export function errorHandler(
     res: Response,
     _next: NextFunction
 ) {
+    const isDevelopment = process.env.NODE_ENV === "development";
+
+    // HttpError - return as-is
+    if (err instanceof HttpError) {
+        return res.status(err.status).json({
+            ok: false,
+            error: err.code,
+            ...(isDevelopment && {
+            debug: {
+                message: err.message,
+                path: req.path,
+            },
+            }),
+        });
+    }
+
     const errObj = err as Error;
     const errorDetails = {
         path: req.path,
@@ -17,13 +34,10 @@ export function errorHandler(
     };
     
     // eslint-disable-next-line no-console
-    console.error('[ERROR HANDLER]', errorDetails);
+    console.error("[ERROR HANDLER]", errorDetails);
     // eslint-disable-next-line no-console
-    console.error('[ERROR HANDLER] Full error:', err);
+    console.error("[ERROR HANDLER] Full error:", err);
 
-    // In development, include error details in response for debugging
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    
     res.status(500).json({
         ok: false,
         error: "InternalServerError",

@@ -10,6 +10,25 @@ function isoInHours(h) {
     return d.toISOString();
 }
 
+// Extract task id from multiple possible response shapes
+function pickTaskId(obj) {
+    if (!obj || typeof obj !== "object") {
+        return null;
+    }
+
+    if (typeof obj.id === "string") {
+        return obj.id;
+    }
+    if (obj.task && typeof obj.task.id === "string") {
+        return obj.task.id;
+    }
+    if (obj.data) {
+        if (typeof obj.data.id === "string") {
+            return obj.data.id;
+        }
+    }
+}
+
 async function req(path, opts = {}) {
     const res = await fetch(`${API_URL}${path}`, {
         ...opts,
@@ -21,14 +40,20 @@ async function req(path, opts = {}) {
 
     const text = await res.text();
     let body;
-    try { 
-        body = JSON.parse(text); 
-    } catch { 
-        body = text; 
+    try {
+        body = JSON.parse(text);
+    } catch {
+        body = text;
     }
 
     if (!res.ok) {
-        throw new Error(`HTTP ${res.status} ${path}: ${typeof body === "string" ? body : JSON.stringify(body)}`);
+        const msg = `HTTP ${res.status} ${path}: ${
+            typeof body === "string" ? body : JSON.stringify(body)
+        }`;
+        const err = new Error(msg);
+        err.status = res.status;
+        err.body = body;
+        throw err;
     }
 
     return body;
@@ -36,9 +61,8 @@ async function req(path, opts = {}) {
 
 async function main() {
     console.log(`[seed] api=${API_URL}`);
-    // 1) Register (if exists - try login)
-    let token = null;
 
+    // 1) Register (ok if already exists), then login
     try {
         await req("/auth/register", {
             method: "POST",
@@ -46,27 +70,49 @@ async function main() {
         });
         console.log(`[seed] registered ${EMAIL}`);
     } catch (e) {
-        console.error(`[seed] register skipped (${e.message})`);
+        const msg = String(e?.message ?? e);
+
+        // Allowed: user already exists (after you implement 409 on the backend)
+        // Also allowed: if backend still returns 500 but with "EmailAlreadyExists" in body
+        const allowed =
+            msg.includes("HTTP 409") ||
+            msg.includes("EmailAlreadyExists") ||
+            (e?.body && typeof e.body === "object" && e.body.error === "EmailAlreadyExists");
+
+        if (allowed) {
+            console.log("[seed] user already exists, continuing");
+        } else {
+            throw e;
+        }
     }
 
     const login = await req("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
     });
-    if (!login.ok) {
-        throw new Error(`Login failed: ${login.error}`);
-    }
-    token = login.accessToken;
-    console.log(`[seed] logged in`);
 
-    // 2) Create tasks
+    if (!login?.ok) {
+        throw new Error(`Login failed: ${login?.error ?? "UnknownError"}`);
+    }
+
+    const token = login.accessToken;
+    if (!token) {
+        console.error("[seed] login response missing accessToken. Response was:");
+        console.error(JSON.stringify(login, null, 2));
+        throw new Error("Login succeeded but accessToken missing");
+    }
+
+    console.log("[seed] logged in");
+
+    // 2) Create tasks (store ids only, robust to response shape)
     const tasksToCreate = Number(process.env.SEED_TASKS ?? 25);
-    const created = [];
+    const createdIds = [];
 
     for (let i = 0; i < tasksToCreate; i++) {
         const dueAt = isoInHours(6 + (i % 10));
         const title = `Seed Task ${i + 1} - ${crypto.randomBytes(2).toString("hex")}`;
-        const res = await req("/tasks", {
+
+        const resp = await req("/tasks", {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
             body: JSON.stringify({
@@ -75,16 +121,25 @@ async function main() {
             dueAt,
             }),
         });
-        created.push(res.task);
+
+        const id = pickTaskId(resp) || pickTaskId(resp?.task);
+        if (!id) {
+            console.error("[seed] create task response missing id. Response was:");
+            console.error(JSON.stringify(resp, null, 2));
+            throw new Error("POST /tasks did not return a task id");
+        }
+
+        createdIds.push(id);
     }
-    console.log(`[seed] created tasks=${created.length}`);
+
+    console.log(`[seed] created tasks=${createdIds.length}`);
 
     // 3) Mark some as DONE, some as CANCELED
-    const doneCount = Math.max(1, Math.floor(created.length * 0.4));
-    const cancelCount = Math.max(0, Math.floor(created.length * 0.1));
+    const doneCount = Math.max(1, Math.floor(createdIds.length * 0.4));
+    const cancelCount = Math.max(0, Math.floor(createdIds.length * 0.1));
 
     for (let i = 0; i < doneCount; i++) {
-        const id = created[i].id;
+        const id = createdIds[i];
         await req(`/tasks/${id}`, {
             method: "PATCH",
             headers: { Authorization: `Bearer ${token}` },
@@ -93,7 +148,7 @@ async function main() {
     }
 
     for (let i = doneCount; i < doneCount + cancelCount; i++) {
-        const id = created[i].id;
+        const id = createdIds[i];
         await req(`/tasks/${id}`, {
             method: "PATCH",
             headers: { Authorization: `Bearer ${token}` },
@@ -102,11 +157,10 @@ async function main() {
     }
 
     console.log(`[seed] done=${doneCount} canceled=${cancelCount}`);
-
-    console.log(`[seed] OK - now run python workers to compute features/segments`);
+    console.log("[seed] OK - now run python workers to compute features/segments");
 }
 
 main().catch((e) => {
-    console.error("[seed] failed:", e);
+    console.error("[seed] failed:", e?.message ?? e);
     process.exit(1);
 });
