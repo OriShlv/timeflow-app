@@ -42,6 +42,15 @@ npm run build
 npm start
 ```
 
+### Integration tests
+
+Requires Postgres and Redis (start via `docker compose up -d postgres redis` from repo root).
+
+```bash
+npm run test:prepare   # creates timeflow_test DB and runs migrations (run once)
+npm run test          # runs auth + tasks integration tests
+```
+
 ### Linting and formatting
 
 This project uses **ESLint** + **Prettier** for the `src/` TypeScript code.

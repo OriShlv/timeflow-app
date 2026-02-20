@@ -1,8 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
 import { HttpError } from './http-error';
 
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
   const isDevelopment = process.env.NODE_ENV === 'development';
+
+  // ZodError - validation failures
+  if (err instanceof ZodError) {
+    return res.status(400).json({
+      ok: false,
+      error: 'ValidationError',
+      details: err.errors,
+    });
+  }
 
   // HttpError - return as-is
   if (err instanceof HttpError) {

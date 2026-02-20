@@ -30,5 +30,9 @@ export async function publishEventById(eventId: string) {
     fields.taskId = ev.taskId;
   }
 
-  await redis.xadd(STREAM, '*', ...Object.entries(fields).flat());
+  try {
+    await redis.xadd(STREAM, '*', ...Object.entries(fields).flat());
+  } catch (e) {
+    console.error('[publisher] redis xadd failed', e);
+  }
 }
