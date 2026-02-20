@@ -19,18 +19,16 @@ export async function publishEventById(eventId: string) {
     return;
   }
 
-  await redis.xadd(
-    STREAM,
-    '*',
-    'eventId',
-    ev.id,
-    'type',
-    ev.type,
-    'userId',
-    ev.userId,
-    'taskId',
-    ev.taskId,
-    'createdAt',
-    ev.createdAt.toISOString(),
-  );
+  const fields: Record<string, string> = {
+    version: '1',
+    eventId: ev.id,
+    type: ev.type,
+    userId: ev.userId,
+    createdAt: ev.createdAt.toISOString(),
+  };
+  if (ev.taskId) {
+    fields.taskId = ev.taskId;
+  }
+
+  await redis.xadd(STREAM, '*', ...Object.entries(fields).flat());
 }

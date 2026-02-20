@@ -1,3 +1,7 @@
+"""
+Realtime features worker: consumes from Redis Streams, updates DailyUserFeatures and UserSegment.
+Consumer group: realtime-features. See docs/EVENTS_CONTRACT.md for event format.
+"""
 import os
 import json
 import uuid
@@ -312,7 +316,7 @@ def main():
                         r.expire(attempts_key, ATTEMPTS_TTL_SEC)
 
                         if attempts >= MAX_RETRIES:
-                            r.xadd(DLQ_STREAM, "*", {"msgId": msg_id, **kv, "error": str(e)})
+                            r.xadd(DLQ_STREAM, {"msgId": msg_id, **kv, "error": str(e)})
                             r.xack(STREAM, GROUP, msg_id)
                             print("[realtime] moved to DLQ", msg_id, str(e))
                         else:
