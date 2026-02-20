@@ -36,3 +36,56 @@ analyticsRouter.get('/daily', async (req: AuthedRequest, res, next) => {
     next(err);
   }
 });
+
+analyticsRouter.get('/summary', async (req: AuthedRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const now = new Date();
+
+    const [total, done, pending, canceled, overdue, latestStats, latestFeatures] =
+      await Promise.all([
+        prisma.task.count({ where: { userId } }),
+        prisma.task.count({ where: { userId, status: 'DONE' } }),
+        prisma.task.count({ where: { userId, status: 'PENDING' } }),
+        prisma.task.count({ where: { userId, status: 'CANCELED' } }),
+        prisma.task.count({
+          where: {
+            userId,
+            status: 'PENDING',
+            dueAt: { lt: now },
+          },
+        }),
+        prisma.dailyUserStats.findFirst({
+          where: { userId },
+          orderBy: { day: 'desc' },
+          select: {
+            day: true,
+            createdCount: true,
+            completedCount: true,
+            completionRate: true,
+            updatedAt: true,
+          },
+        }),
+        prisma.dailyUserFeatures.findFirst({
+          where: { userId },
+          orderBy: { day: 'desc' },
+        }),
+      ]);
+
+    res.json({
+      ok: true,
+      taskSummary: {
+        total,
+        done,
+        pending,
+        canceled,
+        overdue,
+        completionRate: total > 0 ? Number((done / total).toFixed(3)) : 0,
+      },
+      latestDailyStats: latestStats ?? null,
+      latestDailyFeatures: latestFeatures ?? null,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
