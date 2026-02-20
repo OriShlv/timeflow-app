@@ -10,7 +10,7 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     return res.status(400).json({
       ok: false,
       error: 'ValidationError',
-      details: err.errors,
+      details: err.issues,
     });
   }
 
