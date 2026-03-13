@@ -1,14 +1,45 @@
-/* Timeflow color palette - blue variants */
+/* Timeflow – Task Management Dashboard (Dribbble-inspired) */
+/* Ref: https://dribbble.com/shots/16720160-Task-Management-Dashboard */
+html, body {
+  height: 100%;
+  margin: 0;
+}
 :root {
-  --tf-primary: #3b82f6;
-  --tf-primary-hover: #60a5fa;
-  --tf-bg-start: #eff6ff;
-  --tf-bg-end: #dbeafe;
+  --app-header-height: 56px;
+  --tf-primary: #4B50F7;
+  --tf-primary-hover: #3d42e0;
+  --tf-primary-light: rgba(75, 80, 247, 0.08);
+  --tf-accent: #f34f0b;
+  --tf-bg: #F5F6FA;
+  --tf-bg-start: #F5F6FA;
+  --tf-bg-end: #EEF0F6;
   --tf-card: #ffffff;
-  --tf-text: #1e293b;
-  --tf-label: #0f172a;
-  --tf-text-muted: #475569;
-  --tf-input-bg: #f8fafc;
-  --tf-input-text: #1e293b;
-  --tf-border: #e2e8f0;
+  --tf-text: #181E32;
+  --tf-label: #181E32;
+  --tf-text-muted: #6B7280;
+  --tf-input-bg: #f8f8f9;
+  --tf-input-text: #181E32;
+  --tf-border: #E5E7EB;
+  --tf-shadow: 0 1px 2px rgba(24, 30, 50, 0.04);
+  --tf-shadow-card: 0 4px 12px rgba(24, 30, 50, 0.06);
+  --tf-radius: 12px;
+  --tf-radius-sm: 8px;
+  --tf-sidebar-bg: #ffffff;
+  --tf-sidebar-text: #374151;
+  --tf-sidebar-active: var(--tf-primary-light);
+}
+
+/* Page hosts fill outlet; content starts below header */
+app-dashboard-page,
+app-tasks-page {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+}
+
+/* Keep ion-content below app header (no overlap) */
+app-dashboard-page ion-content,
+app-tasks-page ion-content {
+  --offset-top: var(--app-header-height);
 }

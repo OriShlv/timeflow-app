@@ -220,7 +220,7 @@ export class RegisterPageComponent implements ViewWillEnter {
     const nameOrUndefined = name.trim() || undefined;
     this.auth.register(email, password, nameOrUndefined).subscribe({
       next: () => {
-        this.router.navigate(['/tasks']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err: Error) => {
         this.loading = false;

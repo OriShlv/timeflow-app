@@ -206,7 +206,7 @@ export class LoginPageComponent implements ViewWillEnter {
     const { email, password } = this.form.getRawValue();
     this.auth.login(email, password).subscribe({
       next: () => {
-        this.router.navigate(['/tasks']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err: Error) => {
         this.loading = false;

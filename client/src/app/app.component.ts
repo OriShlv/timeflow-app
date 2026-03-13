@@ -1,12 +1,17 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   IonApp,
+  IonMenu,
+  IonMenuToggle,
   IonHeader,
   IonToolbar,
   IonTitle,
-  IonButtons,
-  IonButton,
+  IonContent,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonIcon,
 } from '@ionic/angular/standalone';
 import { IonRouterOutlet } from '@ionic/angular/standalone';
 
@@ -16,12 +21,18 @@ import { AuthService } from './core/auth/auth.service';
   selector: 'app-root',
   imports: [
     IonApp,
+    IonMenu,
+    IonMenuToggle,
     IonHeader,
     IonToolbar,
     IonTitle,
-    IonButtons,
-    IonButton,
+    IonContent,
+    IonList,
+    IonItem,
+    IonLabel,
+    IonIcon,
     IonRouterOutlet,
+    RouterLink,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

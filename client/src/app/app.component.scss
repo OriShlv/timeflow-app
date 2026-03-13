@@ -1,4 +1,121 @@
-ion-toolbar {
-  --background: var(--tf-primary);
-  --color: #fff;
+$header-height: 56px;
+
+ion-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+#main-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.app-header {
+  flex-shrink: 0;
+  height: $header-height;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--tf-card);
+  box-shadow: var(--tf-shadow);
+}
+.app-toolbar {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+  gap: 16px;
+}
+.menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius-sm);
+  background: var(--tf-card);
+  color: var(--tf-text-muted);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.menu-btn:hover {
+  background: var(--tf-primary-light);
+  color: var(--tf-primary);
+  border-color: var(--tf-primary);
+}
+.menu-btn-icon {
+  line-height: 1;
+}
+.app-title {
+  flex: 1;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: -0.02em;
+  color: var(--tf-text);
+}
+.logout-btn {
+  padding: 0 14px;
+  min-height: 40px;
+  border: none;
+  border-radius: var(--tf-radius-sm);
+  background: transparent;
+  color: var(--tf-text-muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.logout-btn:hover {
+  background: var(--tf-primary-light);
+  color: var(--tf-primary);
+}
+.page-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 0;
+}
+ion-router-outlet {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* Sidebar menu – Dribbble-style */
+ion-menu ion-header ion-toolbar {
+  --background: var(--tf-sidebar-bg);
+  --border-width: 0;
+  --min-height: 56px;
+}
+ion-menu ion-title {
+  font-weight: 700;
+  color: var(--tf-text);
+}
+ion-menu ion-content {
+  --background: var(--tf-sidebar-bg);
+}
+ion-menu ion-item {
+  --background: transparent;
+  --color: var(--tf-sidebar-text);
+  font-weight: 500;
+  border-radius: var(--tf-radius-sm);
+  margin: 2px 12px;
+}
+ion-menu ion-item:hover {
+  --background: var(--tf-primary-light);
+}
+ion-item.selected {
+  --background: var(--tf-primary-light);
+  --color: var(--tf-primary);
+  font-weight: 600;
+}
+ion-item.selected ion-icon {
+  color: var(--tf-primary);
 }
