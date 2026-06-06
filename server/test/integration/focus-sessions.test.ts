@@ -22,6 +22,10 @@ describe('Focus sessions API', () => {
   let userId = '';
 
   afterAll(async () => {
+    if (userId.length === 0) {
+      return;
+    }
+
     await prisma.focusSession.deleteMany({ where: { userId } });
     await prisma.taskEvent.deleteMany({ where: { userId } });
     await prisma.user.deleteMany({ where: { id: userId } });
