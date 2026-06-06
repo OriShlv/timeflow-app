@@ -1,0 +1,75 @@
+.task-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1rem 0;
+  border-bottom: 1px solid var(--tf-border);
+}
+
+.task-form-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--tf-text);
+}
+
+.task-form {
+  padding: 1.25rem 1rem 1.5rem;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.task-form__error {
+  color: var(--tf-danger);
+  margin: 0 0 1.25rem 0;
+  padding: 0.75rem 1rem;
+  background: var(--tf-danger-light);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.field-group {
+  margin-bottom: 1.25rem;
+}
+
+.field-label {
+  display: block;
+  color: var(--tf-label);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.optional {
+  color: var(--tf-text-muted);
+  font-weight: 400;
+}
+
+.field-error {
+  color: var(--tf-danger);
+  font-size: 0.8125rem;
+  margin: 0.375rem 0 0;
+  padding-left: 0.25rem;
+}
+
+.task-form-input .tf-input,
+.task-form-input .tf-textarea {
+  border: 1px solid var(--tf-border);
+  border-radius: 8px;
+}
+
+.task-form-input:focus-within .tf-input,
+.task-form-input:focus-within .tf-textarea {
+  border-color: var(--tf-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tf-primary) 20%, transparent);
+}
+
+.task-form-select {
+  width: 100%;
+}
+
+.submit-btn {
+  margin-top: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}

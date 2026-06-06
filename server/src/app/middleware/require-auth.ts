@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { TokenExpiredError } from 'jsonwebtoken';
 import { verifyAccessToken } from '../../core/jwt';
 
 export type AuthedRequest = Request & { user?: { id: string; email: string } };
@@ -15,7 +16,11 @@ export function requireAuth(req: AuthedRequest, res: Response, next: NextFunctio
 
     req.user = { id: payload.sub, email: payload.email };
     return next();
-  } catch {
+  } catch (error: unknown) {
+    if (error instanceof TokenExpiredError) {
+      return res.status(401).json({ ok: false, error: 'ExpiredToken' });
+    }
+
     return res.status(401).json({ ok: false, error: 'InvalidToken' });
   }
 }

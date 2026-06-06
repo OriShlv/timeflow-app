@@ -1,0 +1,28 @@
+.daily-stats {
+  margin: 0;
+}
+
+.daily-stats__header {
+  padding: 16px 16px 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tf-text-muted);
+}
+
+.daily-stats__grid {
+  padding: 8px 16px 16px;
+}
+
+.daily-stats__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.daily-stats__row + .daily-stats__row {
+  margin-top: 8px;
+}
+
+.daily-stats__label {
+  font-weight: 700;
+}

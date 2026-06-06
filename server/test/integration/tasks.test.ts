@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import jwt from 'jsonwebtoken';
 import { createServer } from '../../src/app/server';
+import { env } from '../../src/config/env';
 import { prisma } from '../../src/db/prisma';
 
 const app = createServer();
@@ -17,16 +19,21 @@ async function registerAndGetToken(): Promise<{ userId: string; accessToken: str
 describe('Tasks API', () => {
   let accessToken: string;
   let userId: string;
+  let otherUserId: string;
 
   beforeAll(async () => {
     const auth = await registerAndGetToken();
     accessToken = auth.accessToken;
     userId = auth.userId;
+
+    const otherAuth = await registerAndGetToken();
+    otherUserId = otherAuth.userId;
   });
 
   afterAll(async () => {
-    await prisma.task.deleteMany({ where: { userId } });
-    await prisma.user.deleteMany({ where: { id: userId } });
+    await prisma.task.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
+    await prisma.taskEvent.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
+    await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   });
 
   describe('POST /tasks', () => {
@@ -48,18 +55,38 @@ describe('Tasks API', () => {
     });
 
     it('rejects without auth', async () => {
-      await request(app)
+      const res = await request(app)
         .post('/tasks')
         .send({ title: 'No auth task' })
         .expect(401);
+
+      expect(res.body.error).toBe('MissingAuth');
     });
 
     it('rejects invalid token', async () => {
-      await request(app)
+      const res = await request(app)
         .post('/tasks')
         .set('Authorization', 'Bearer invalid-token')
         .send({ title: 'Task' })
         .expect(401);
+
+      expect(res.body.error).toBe('InvalidToken');
+    });
+
+    it('rejects expired token', async () => {
+      const expiredToken = jwt.sign(
+        { sub: userId, email: 'expired@example.com' },
+        env.JWT_SECRET,
+        { expiresIn: -1 }
+      );
+
+      const res = await request(app)
+        .post('/tasks')
+        .set('Authorization', `Bearer ${expiredToken}`)
+        .send({ title: 'Task' })
+        .expect(401);
+
+      expect(res.body.error).toBe('ExpiredToken');
     });
 
     it('rejects empty title', async () => {
@@ -139,6 +166,20 @@ describe('Tasks API', () => {
 
       expect(res.body.error).toBe('TaskNotFound');
     });
+
+    it('returns 404 when updating another user task', async () => {
+      const foreignTask = await prisma.task.create({
+        data: { userId: otherUserId, title: 'Foreign task', status: 'PENDING' },
+      });
+
+      const res = await request(app)
+        .patch(`/tasks/${foreignTask.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ title: 'Unauthorized update' })
+        .expect(404);
+
+      expect(res.body.error).toBe('TaskNotFound');
+    });
   });
 
   describe('DELETE /tasks/:id', () => {
@@ -168,6 +209,82 @@ describe('Tasks API', () => {
         .expect(404);
 
       expect(res.body.error).toBe('TaskNotFound');
+    });
+
+    it('returns 404 when deleting another user task', async () => {
+      const foreignTask = await prisma.task.create({
+        data: { userId: otherUserId, title: 'Do not delete me', status: 'PENDING' },
+      });
+
+      const res = await request(app)
+        .delete(`/tasks/${foreignTask.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(404);
+
+      expect(res.body.error).toBe('TaskNotFound');
+
+      const stillExists = await prisma.task.findUnique({ where: { id: foreignTask.id } });
+      expect(stillExists).not.toBeNull();
+      expect(stillExists?.userId).toBe(otherUserId);
+    });
+  });
+
+  describe('Ownership isolation', () => {
+    it('does not list another user tasks', async () => {
+      const ownTask = await prisma.task.create({
+        data: { userId, title: 'My own list task', status: 'PENDING' },
+      });
+      const otherTask = await prisma.task.create({
+        data: { userId: otherUserId, title: 'Other list task', status: 'PENDING' },
+      });
+
+      const res = await request(app)
+        .get('/tasks')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200);
+
+      const ids = new Set(res.body.items.map((task: { id: string }) => task.id));
+      expect(ids.has(ownTask.id)).toBe(true);
+      expect(ids.has(otherTask.id)).toBe(false);
+    });
+  });
+
+  describe('Task completion event idempotency', () => {
+    it('creates TASK_COMPLETED once for first DONE transition only', async () => {
+      const task = await prisma.task.create({
+        data: { userId, title: 'Idempotency task', status: 'PENDING' },
+      });
+      const dedupeKey = `TASK_COMPLETED:${task.id}`;
+
+      await request(app)
+        .patch(`/tasks/${task.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ status: 'DONE' })
+        .expect(200);
+
+      await request(app)
+        .patch(`/tasks/${task.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ status: 'DONE' })
+        .expect(200);
+
+      await request(app)
+        .patch(`/tasks/${task.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ status: 'PENDING' })
+        .expect(200);
+
+      await request(app)
+        .patch(`/tasks/${task.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ status: 'DONE' })
+        .expect(200);
+
+      const completionEvents = await prisma.taskEvent.findMany({
+        where: { userId, taskId: task.id, type: 'TASK_COMPLETED' },
+      });
+      expect(completionEvents).toHaveLength(1);
+      expect(completionEvents[0]?.dedupeKey).toBe(dedupeKey);
     });
   });
 });

@@ -1,0 +1,76 @@
+.tf-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--tf-radius-sm);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.tf-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tf-button--solid {
+  border: none;
+  background: var(--tf-primary);
+  color: #fff;
+}
+
+.tf-button--solid:hover:not(:disabled) {
+  background: var(--tf-primary-hover);
+}
+
+.tf-button--outline {
+  border: 1px solid var(--tf-border);
+  background: var(--tf-card);
+  color: var(--tf-text);
+}
+
+.tf-button--outline:hover:not(:disabled) {
+  background: var(--tf-primary-light);
+  border-color: var(--tf-primary);
+  color: var(--tf-primary);
+}
+
+.tf-button--clear {
+  border: none;
+  background: transparent;
+  color: var(--tf-text-muted);
+  padding: 0.375rem 0.75rem;
+  font-weight: 500;
+}
+
+.tf-button--clear:hover:not(:disabled) {
+  background: var(--tf-primary-light);
+  color: var(--tf-primary);
+}
+
+.tf-button--danger.tf-button--clear {
+  color: var(--tf-danger);
+}
+
+.tf-button--danger.tf-button--clear:hover:not(:disabled) {
+  background: var(--tf-danger-light);
+  color: var(--tf-danger);
+}
+
+.tf-button--small {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.tf-button--block {
+  display: flex;
+  width: 100%;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}

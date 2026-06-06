@@ -1,10 +1,10 @@
-## Server (Node.js API)
+## Server (Bun API)
 
-This directory contains the TimeFlow HTTP API implemented with **Node.js + TypeScript + Express + Prisma**.
+This directory contains the TimeFlow HTTP API implemented with **Bun + TypeScript + Express + Prisma**.
 
 ### Prerequisites
 
-- Node.js 20+ (recommended)
+- Bun 1.1+ (recommended)
 - Docker (for Postgres + Redis via the repo’s `docker-compose.yml`)
 
 ### Setup
@@ -12,19 +12,19 @@ This directory contains the TimeFlow HTTP API implemented with **Node.js + TypeS
 ```bash
 cd server
 cp .env.example .env  # configure DATABASE_URL and REDIS_URL
-npm install
+bun install
 ```
 
 Run database migrations:
 
 ```bash
-npm run db:migrate
+bun run db:migrate
 ```
 
 Optionally seed demo data:
 
 ```bash
-npm run dev:demo
+bun run dev:demo
 ```
 
 ### Running the server
@@ -32,14 +32,14 @@ npm run dev:demo
 Development mode with auto-reload:
 
 ```bash
-npm run dev
+bun run dev
 ```
 
-Build and run the compiled server:
+Type-check and run the server directly from TypeScript:
 
 ```bash
-npm run build
-npm start
+bun run build
+bun start
 ```
 
 ### Integration tests
@@ -47,8 +47,8 @@ npm start
 Requires Postgres and Redis (start via `docker compose up -d postgres redis` from repo root).
 
 ```bash
-npm run test:prepare   # creates timeflow_test DB and runs migrations (run once)
-npm run test          # runs auth + tasks integration tests
+bun run test:prepare   # creates timeflow_test DB and runs migrations (run once)
+bun run test          # runs auth + tasks integration tests
 ```
 
 ### Linting and formatting
@@ -58,23 +58,23 @@ This project uses **ESLint** + **Prettier** for the `src/` TypeScript code.
 - Lint the code:
 
   ```bash
-  npm run lint
+  bun run lint
   ```
 
 - Auto-fix lint issues:
 
   ```bash
-  npm run lint:fix
+  bun run lint:fix
   ```
 
 - Format code with Prettier:
 
   ```bash
-  npm run format
+  bun run format
   ```
 
 - Check formatting without writing changes:
 
   ```bash
-  npm run format:check
+  bun run format:check
   ```

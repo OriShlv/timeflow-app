@@ -1,0 +1,7 @@
+.tf-card {
+  background: var(--tf-card);
+  color-scheme: light;
+  border-radius: var(--tf-radius);
+  box-shadow: var(--tf-shadow-card);
+  border: 1px solid var(--tf-border);
+}

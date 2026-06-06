@@ -1,0 +1,88 @@
+.dashboard-page {
+  background: var(--tf-bg);
+  color: var(--tf-text);
+  min-height: 100%;
+  padding-bottom: 6rem;
+}
+
+.dashboard-inner {
+  padding: 1.5rem 24px 0;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: 24px;
+}
+
+.dashboard-header__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dashboard-title {
+  margin: 0 0 4px 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--tf-text);
+}
+
+.dashboard-subtitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--tf-text-muted);
+}
+
+.dashboard-refresh {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius-sm);
+  background: var(--tf-card);
+  color: var(--tf-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dashboard-refresh:hover:not(:disabled) {
+  border-color: var(--tf-primary);
+  color: var(--tf-primary);
+}
+
+.dashboard-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.segment-wrap {
+  display: inline-flex;
+}
+
+.overview-section,
+.daily-section {
+  margin-bottom: 28px;
+}
+
+.section-title {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--tf-text);
+}
+
+.recommendations-section {
+  margin-top: 8px;
+}

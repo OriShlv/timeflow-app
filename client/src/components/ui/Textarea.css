@@ -1,0 +1,35 @@
+.tf-textarea-wrap {
+  background: var(--tf-input-bg);
+  border-radius: var(--tf-radius-sm);
+  border: 1px solid var(--tf-border);
+}
+
+.tf-textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem;
+  border: none;
+  border-radius: var(--tf-radius-sm);
+  background: transparent;
+  color: var(--tf-input-text);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.tf-textarea::placeholder {
+  color: var(--tf-text-muted);
+}
+
+.tf-textarea:focus {
+  outline: 2px solid var(--tf-primary-light);
+  outline-offset: -1px;
+}
+
+.tf-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

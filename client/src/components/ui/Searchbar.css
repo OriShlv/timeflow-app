@@ -1,0 +1,28 @@
+.tf-searchbar {
+  padding: 0;
+  background: var(--tf-input-bg);
+  border-radius: var(--tf-radius-sm);
+  border: 1px solid var(--tf-border);
+}
+
+.tf-searchbar__input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.625rem 0.75rem;
+  border: none;
+  border-radius: var(--tf-radius-sm);
+  background: transparent;
+  color: var(--tf-input-text);
+  font-family: inherit;
+  font-size: 0.9375rem;
+}
+
+.tf-searchbar__input::placeholder {
+  color: var(--tf-text-muted);
+}
+
+.tf-searchbar__input:focus {
+  outline: 2px solid var(--tf-primary-light);
+  outline-offset: -1px;
+}

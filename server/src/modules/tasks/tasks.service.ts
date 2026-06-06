@@ -19,33 +19,41 @@ export async function createTask(
   userId: string,
   data: { title: string; description?: string; dueAt?: Date },
 ) {
-  const task = await prisma.task.create({
-    data: {
+  const { task, eventId } = await prisma.$transaction(async (tx) => {
+    const createdTask = await tx.task.create({
+      data: {
+        userId,
+        title: data.title,
+        description: data.description,
+        dueAt: data.dueAt,
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        dueAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    const event = await createTaskEvent(tx, {
       userId,
-      title: data.title,
-      description: data.description,
-      dueAt: data.dueAt,
-    },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      status: true,
-      dueAt: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+      taskId: createdTask.id,
+      type: 'TASK_CREATED',
+      payload: {
+        title: createdTask.title,
+      },
+      dedupeKey: `TASK_CREATED:${createdTask.id}`,
+    });
+
+    return { task: createdTask, eventId: event?.id };
   });
 
-  await createAndPublishTaskEvent({
-    userId,
-    taskId: task.id,
-    type: 'TASK_CREATED',
-    payload: {
-      title: task.title,
-    },
-    dedupeKey: `TASK_CREATED:${task.id}`,
-  });
+  if (eventId) {
+    await publishEventById(eventId);
+  }
 
   return task;
 }
@@ -109,38 +117,49 @@ export async function listTasks(params: ListParams) {
 }
 
 export async function updateTask(userId: string, taskId: string, data: Prisma.TaskUpdateInput) {
-  const existing = await prisma.task.findFirst({ where: { id: taskId, userId } });
-  if (!existing) {
+  const result = await prisma.$transaction(async (tx) => {
+    const existing = await tx.task.findFirst({ where: { id: taskId, userId } });
+    if (!existing) {
+      return null;
+    }
+
+    const nextStatus = data.status as TaskStatus | undefined;
+    const updatedTask = await tx.task.update({
+      where: { id: taskId },
+      data,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        dueAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    const event = existing.status !== 'DONE' && nextStatus === 'DONE'
+      ? await createTaskEvent(tx, {
+          userId,
+          taskId: taskId,
+          type: 'TASK_COMPLETED',
+          payload: { from: existing.status, to: 'DONE' },
+          dedupeKey: `TASK_COMPLETED:${taskId}`,
+        })
+      : null;
+
+    return { updatedTask, eventId: event?.id };
+  });
+
+  if (!result) {
     return null;
   }
 
-  const nextStatus = data.status as TaskStatus | undefined;
-
-  const updatedTask = await prisma.task.update({
-    where: { id: taskId },
-    data,
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      status: true,
-      dueAt: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-
-  if (existing.status !== 'DONE' && nextStatus === 'DONE') {
-    await createAndPublishTaskEvent({
-      userId,
-      taskId: taskId,
-      type: 'TASK_COMPLETED',
-      payload: { from: existing.status, to: 'DONE' },
-      dedupeKey: `TASK_COMPLETED:${taskId}`,
-    });
+  if (result.eventId) {
+    await publishEventById(result.eventId);
   }
 
-  return updatedTask;
+  return result.updatedTask;
 }
 
 export async function deleteTask(userId: string, taskId: string) {
@@ -153,7 +172,9 @@ export async function deleteTask(userId: string, taskId: string) {
   return true;
 }
 
-async function createAndPublishTaskEvent(params: {
+async function createTaskEvent(
+  tx: Prisma.TransactionClient,
+  params: {
   userId: string;
   taskId?: string;
   type: string;
@@ -162,7 +183,7 @@ async function createAndPublishTaskEvent(params: {
 }) {
   // If dedupeKey is exists, try ro create an event. If exists one, we will not repost the event.
   try {
-    const ev = await prisma.taskEvent.create({
+    const ev = await tx.taskEvent.create({
       data: {
         userId: params.userId,
         taskId: params.taskId,
@@ -172,12 +193,13 @@ async function createAndPublishTaskEvent(params: {
       },
       select: { id: true, type: true },
     });
-
-    await publishEventById(ev.id);
     return ev;
   } catch (e: unknown) {
-    // unique violation is already exist on dedupeKey: event
-    if (e && typeof e === 'object' && 'code' in e && (e as { code: string }).code === 'P2002') {
+    const prismaErrorCode = typeof e === 'object' && e !== null && 'code' in e
+      ? String((e as { code: unknown }).code)
+      : null;
+    // unique violation means an event already exists for this dedupe key
+    if (prismaErrorCode === 'P2002') {
       return null;
     }
     throw e;

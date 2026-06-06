@@ -1,0 +1,58 @@
+.tf-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.tf-confirm__backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background: rgba(24, 30, 50, 0.45);
+  cursor: pointer;
+}
+
+.tf-confirm__panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 22rem;
+  padding: 1.25rem;
+  background: var(--tf-card);
+  border-radius: var(--tf-radius);
+  box-shadow: var(--tf-shadow-card);
+  border: 1px solid var(--tf-border);
+}
+
+.tf-confirm__header {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--tf-text);
+}
+
+.tf-confirm__message {
+  margin: 0 0 1.25rem 0;
+  font-size: 0.9375rem;
+  color: var(--tf-text-muted);
+  line-height: 1.45;
+}
+
+.tf-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.tf-confirm__actions .tf-button--solid.tf-button--danger {
+  background: var(--tf-danger);
+}
+
+.tf-confirm__actions .tf-button--solid.tf-button--danger:hover:not(:disabled) {
+  background: #dc2626;
+}

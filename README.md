@@ -14,7 +14,7 @@ It is designed as a production‑style backend system that demonstrates modern p
 
 ## Architecture
 
-- **`server/`** – Node.js API (TypeScript, Express, Prisma)  
+- **`server/`** – Bun API (TypeScript, Express, Prisma)  
   - Routes for auth, users, tasks, analytics, recommendations, features, segments, insights, and ops.
   - Centralized error handling and HTTP logging with `pino-http`.
   - PostgreSQL via Prisma, Redis for streams and real‑time pipelines.
@@ -31,14 +31,14 @@ This layout is meant to mirror a realistic service: a typed HTTP API, background
 ---
 
 ## Tech stack
-- **Language / runtime**: Node.js, TypeScript
+- **Language / runtime**: Bun, TypeScript
 - **Web framework**: Express
 - **ORM / DB access**: Prisma (PostgreSQL)
 - **Messaging / streaming**: Redis Streams (`ioredis`)
 - **Auth & security**: JWT, bcrypt, helmet, CORS
 - **Validation**: Zod
 - **Logging**: pino / pino‑http
-- **Infra / tooling**: Docker Compose (Postgres + Redis), dotenv
+- **Infra / tooling**: Docker Compose (Postgres + Redis)
 - **Workers**: Python (for analytics + real‑time workers)
 
 ---
@@ -53,14 +53,14 @@ docker compose up -d
 
 This starts Postgres and Redis for local development.
 
-### 2) Run the server (Node.js API)
+### 2) Run the server (Bun API)
 
 ```bash
 cd server
 cp .env.example .env   # or create .env with DATABASE_URL and REDIS_URL
-npm install
-npx prisma migrate dev
-npm run dev
+bun install
+bunx prisma migrate dev
+bun run dev
 ```
 
 The API will be available on `http://localhost:<PORT>` (see `server/src/config/env.ts` for the exact port).
@@ -118,15 +118,15 @@ Endpoints are implemented with TypeScript, Prisma, and Zod to enforce input/outp
 ## Development workflow
 
 - **Local development**
-  - `npm run dev` in `server/` runs the API with `ts-node-dev` and automatic reload.
+  - `bun run dev` in `server/` runs the API with `bun --watch` and automatic reload.
   - Python workers can be started independently and pointed at the same Redis / Postgres.
 - **Database**
-  - `npm run db:migrate` – run Prisma migrations locally.
-  - `npm run db:reset` – reset the database.
-  - `npm run dev:demo` – reset and seed demo data (see `scripts/seed-demo.js`).
+  - `bun run db:migrate` – run Prisma migrations locally.
+  - `bun run db:reset` – reset the database.
+  - `bun run dev:demo` – reset and seed demo data (see `scripts/seed-demo.js`).
 - **Build & production**
-  - `npm run build` – compile TypeScript to `dist/`.
-  - `npm start` – start the compiled server.
+  - `bun run build` – type-check the TypeScript sources (`tsc --noEmit`).
+  - `bun start` – run the server directly from TypeScript.
 
 Configuration is environment‑driven (`.env` files) and can be adapted to different environments.
 

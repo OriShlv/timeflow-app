@@ -1,0 +1,44 @@
+.tf-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .tf-modal {
+    align-items: center;
+  }
+}
+
+.tf-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background: rgba(24, 30, 50, 0.4);
+  cursor: pointer;
+}
+
+.tf-modal__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 32rem;
+  max-height: 92dvh;
+  background: var(--tf-bg);
+  border-radius: var(--tf-radius) var(--tf-radius) 0 0;
+  box-shadow: var(--tf-shadow-card);
+  overflow-y: auto;
+}
+
+@media (min-width: 640px) {
+  .tf-modal__panel {
+    border-radius: var(--tf-radius);
+    max-height: 85dvh;
+  }
+}

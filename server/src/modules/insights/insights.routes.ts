@@ -26,8 +26,11 @@ insightsRouter.get('/', requireAuth, async (req: AuthedRequest, res, next) => {
           orderBy: { day: 'desc' },
         }),
         prisma.userRecommendation.findMany({
-          where: { userId },
-          orderBy: { createdAt: 'desc' },
+          where: {
+            userId,
+            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+          },
+          orderBy: [{ score: 'desc' }, { updatedAt: 'desc' }],
           take: 5,
         }),
 

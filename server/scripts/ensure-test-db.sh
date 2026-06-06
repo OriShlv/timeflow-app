@@ -7,4 +7,4 @@ export DATABASE_URL="${DATABASE_URL:-postgresql://timeflow:timeflow@localhost:54
 
 docker compose exec -T postgres psql -U timeflow -d timeflow -c "CREATE DATABASE timeflow_test" 2>/dev/null || true
 
-cd server && npx prisma migrate deploy
+cd server && bunx prisma migrate deploy

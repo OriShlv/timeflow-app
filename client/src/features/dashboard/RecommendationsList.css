@@ -1,0 +1,40 @@
+.recommendations-card {
+  background: var(--tf-card);
+  border-radius: var(--tf-radius);
+  box-shadow: var(--tf-shadow-card);
+  border: 1px solid var(--tf-border);
+  padding: 20px;
+}
+
+.rec-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--tf-border);
+}
+
+.rec-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.rec-item:first-child {
+  padding-top: 0;
+}
+
+.rec-message {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--tf-text);
+}
+
+.rec-evidence {
+  margin: 4px 0 0 0;
+  font-size: 0.8125rem;
+  color: var(--tf-text-muted);
+}
+
+.rec-empty {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--tf-text-muted);
+}

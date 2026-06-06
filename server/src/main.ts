@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { createServer } from './app/server';
 import { env } from './config/env';
 

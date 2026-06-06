@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import jwt from 'jsonwebtoken';
 import { createServer } from '../../src/app/server';
 import { prisma } from '../../src/db/prisma';
+import { env } from '../../src/config/env';
 
 const app = createServer();
 
@@ -85,5 +87,49 @@ describe('POST /auth/login', () => {
       .expect(401);
 
     expect(res.body.ok).toBe(false);
+  });
+});
+
+describe('Auth middleware behavior on protected routes', () => {
+  const email = `guard-${Date.now()}@example.com`;
+  const password = 'guardpass123';
+  let userId = '';
+
+  beforeAll(async () => {
+    const registerRes = await request(app)
+      .post('/auth/register')
+      .send({ email, password, name: 'Guard User' })
+      .expect(201);
+    userId = registerRes.body.user.id;
+  });
+
+  afterAll(async () => {
+    await prisma.user.deleteMany({ where: { email } });
+  });
+
+  it('returns 401 MissingAuth for non-bearer authorization header', async () => {
+    const res = await request(app)
+      .get('/tasks')
+      .set('Authorization', 'Token some-token')
+      .expect(401);
+
+    expect(res.body.ok).toBe(false);
+    expect(res.body.error).toBe('MissingAuth');
+  });
+
+  it('returns 401 ExpiredToken for expired jwt bearer token', async () => {
+    const expiredToken = jwt.sign(
+      { sub: userId, email },
+      env.JWT_SECRET,
+      { expiresIn: -1 }
+    );
+
+    const res = await request(app)
+      .get('/tasks')
+      .set('Authorization', `Bearer ${expiredToken}`)
+      .expect(401);
+
+    expect(res.body.ok).toBe(false);
+    expect(res.body.error).toBe('ExpiredToken');
   });
 });

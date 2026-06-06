@@ -1,0 +1,193 @@
+.tasks-list {
+  color-scheme: light;
+  padding: 0 1rem 1rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.filters-section {
+  background: var(--tf-card);
+  border-radius: var(--tf-radius);
+  box-shadow: var(--tf-shadow-card);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filters-section .search-bar {
+  padding: 0;
+}
+
+.filters-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.filter-select {
+  min-width: 120px;
+}
+
+.date-input {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius-sm);
+  font-size: 0.875rem;
+  background: var(--tf-input-bg);
+  color: var(--tf-text);
+}
+
+.date-sep {
+  color: var(--tf-text-muted);
+  font-size: 0.875rem;
+}
+
+.error-banner {
+  background: var(--tf-danger-light);
+  color: var(--tf-danger);
+  padding: 0.75rem 1rem;
+  border-radius: var(--tf-radius-sm);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.progress-bar-wrap {
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--tf-border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--tf-primary);
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+
+.progress-label {
+  font-size: 0.8125rem;
+  color: var(--tf-text-muted);
+}
+
+.task-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.task-card {
+  display: flex;
+  background: var(--tf-card);
+  border-radius: var(--tf-radius);
+  box-shadow: var(--tf-shadow-card);
+  overflow: hidden;
+  border: 1px solid var(--tf-border);
+}
+
+.task-card-status {
+  width: 4px;
+  flex-shrink: 0;
+  background: var(--tf-primary);
+}
+
+.task-card-status[data-status='DONE'] {
+  background: var(--tf-success);
+}
+
+.task-card-status[data-status='CANCELED'] {
+  background: var(--tf-text-muted);
+}
+
+.task-card-body {
+  flex: 1;
+  padding: 1rem;
+  min-width: 0;
+}
+
+.task-title {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tf-text);
+  letter-spacing: -0.01em;
+}
+
+.task-done .task-title {
+  text-decoration: line-through;
+  color: var(--tf-text-muted);
+}
+
+.task-desc {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--tf-text-muted);
+  line-height: 1.4;
+}
+
+.task-due {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8125rem;
+  color: var(--tf-text-muted);
+}
+
+.task-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--tf-border);
+}
+
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tf-primary) 18%, transparent);
+  color: var(--tf-primary);
+}
+
+.status-pill[data-status='DONE'] {
+  background: var(--tf-success-light);
+  color: var(--tf-success);
+}
+
+.status-pill[data-status='CANCELED'] {
+  background: var(--tf-border);
+  color: var(--tf-text-muted);
+}
+
+.task-actions {
+  display: flex;
+  gap: 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--tf-text-muted);
+  font-size: 0.9375rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.page-info {
+  font-size: 0.875rem;
+  color: var(--tf-text-muted);
+}
