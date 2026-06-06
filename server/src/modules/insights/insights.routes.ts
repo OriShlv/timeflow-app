@@ -70,6 +70,8 @@ insightsRouter.get('/', requireAuth, async (req: AuthedRequest, res, next) => {
       daily: latestDaily ?? null,
       recommendations: recommendations.map((r) => ({
         id: r.id,
+        type: r.type,
+        score: r.score,
         message: r.message,
         evidence: r.evidence,
         expiresAt: r.expiresAt,

@@ -41,7 +41,7 @@ export function LoginPage(): ReactElement {
     setLoading(true);
     try {
       await auth.login(email, password);
-      navigate('/dashboard', { replace: true });
+      navigate('/today', { replace: true });
     } catch (err: unknown) {
       setLoading(false);
       const message = err instanceof Error ? err.message : 'Login failed';

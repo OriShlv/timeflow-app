@@ -1,0 +1,38 @@
+.profile-page {
+  background: var(--tf-bg);
+  min-height: 100%;
+}
+
+.profile-page__inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem 0;
+}
+
+.profile-page__header h2 {
+  margin: 0 0 0.9rem;
+  color: var(--tf-text);
+}
+
+.profile-card {
+  background: var(--tf-card);
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius);
+  padding: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--tf-text);
+}
+
+.profile-row__label {
+  color: var(--tf-text-muted);
+}
+
+.profile-logout {
+  margin-top: 0.5rem;
+}

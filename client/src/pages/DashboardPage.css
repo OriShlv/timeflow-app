@@ -86,3 +86,68 @@
 .recommendations-section {
   margin-top: 8px;
 }
+
+.onboarding-banner {
+  border: 1px solid var(--tf-border);
+  background: var(--tf-card);
+  border-radius: var(--tf-radius);
+  padding: 0.75rem 1rem;
+  margin-bottom: 20px;
+  color: var(--tf-text);
+  font-size: 0.875rem;
+}
+
+.trends-section {
+  margin-top: 22px;
+}
+
+.trends-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trends-range {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.trend-range-btn {
+  border: 1px solid var(--tf-border);
+  background: var(--tf-card);
+  color: var(--tf-text);
+  border-radius: var(--tf-radius-sm);
+  padding: 0.2rem 0.45rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.trend-range-btn--active {
+  border-color: var(--tf-primary);
+  color: var(--tf-primary);
+}
+
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.trend-card {
+  border: 1px solid var(--tf-border);
+  background: var(--tf-card);
+  border-radius: var(--tf-radius);
+  padding: 0.75rem;
+}
+
+.trend-label {
+  font-size: 0.75rem;
+  color: var(--tf-text-muted);
+}
+
+.trend-value {
+  margin-top: 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--tf-text);
+}

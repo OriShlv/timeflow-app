@@ -6,10 +6,13 @@ import {
   useState,
   type ReactElement,
 } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { Button, Searchbar, Select } from '../../components/ui';
 import type { SelectOption } from '../../components/ui/Select';
+import { startFocusSession } from '../../lib/focusSessionsApi';
 import { getTasks } from '../../lib/tasksApi';
+import { updateTask } from '../../lib/tasksApi';
 import type { ListTasksParams, Task, TaskStatus } from '../../lib/types';
 import './TasksList.css';
 
@@ -55,12 +58,14 @@ function buildParams(
   statusFilter: TaskStatus | '',
   fromDate: string,
   toDate: string,
+  sort: 'createdAt' | 'dueAt',
+  order: 'asc' | 'desc',
 ): ListTasksParams {
   const params: ListTasksParams = {
     page,
     pageSize,
-    sort: 'createdAt',
-    order: 'desc',
+    sort,
+    order,
   };
 
   const q = searchQuery.trim();
@@ -82,8 +87,17 @@ function buildParams(
 
 export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
   function TasksList(props, ref): ReactElement {
+    const [searchParams] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState<string>('');
-    const [statusFilter, setStatusFilter] = useState<TaskStatus | ''>('');
+    const [statusFilter, setStatusFilter] = useState<TaskStatus | ''>(
+      (searchParams.get('status') as TaskStatus | '') ?? '',
+    );
+    const [sort, setSort] = useState<'createdAt' | 'dueAt'>(
+      searchParams.get('sort') === 'dueAt' ? 'dueAt' : 'createdAt',
+    );
+    const [order, setOrder] = useState<'asc' | 'desc'>(
+      searchParams.get('order') === 'asc' ? 'asc' : 'desc',
+    );
     const [fromDate, setFromDate] = useState<string>('');
     const [toDate, setToDate] = useState<string>('');
     const [page, setPage] = useState<number>(1);
@@ -92,13 +106,14 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
     const fetchTasks = useCallback(
       (targetPage: number): void => {
         setLoading(true);
         setError(null);
 
-        getTasks(buildParams(targetPage, pageSize, searchQuery, statusFilter, fromDate, toDate))
+        getTasks(buildParams(targetPage, pageSize, searchQuery, statusFilter, fromDate, toDate, sort, order))
           .then((result) => {
             setTasks(result.items);
             setTotalPages(result.totalPages);
@@ -109,7 +124,7 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
             setLoading(false);
           });
       },
-      [pageSize, searchQuery, statusFilter, fromDate, toDate],
+      [pageSize, searchQuery, statusFilter, fromDate, toDate, sort, order],
     );
 
     const load = useCallback((): void => {
@@ -132,24 +147,66 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
       setStatusFilter('');
       setFromDate('');
       setToDate('');
+      setSort('createdAt');
+      setOrder('desc');
       setPage(1);
     }, []);
 
-    const applyFilters = useCallback((): void => {
-      setPage(1);
-      setLoading(true);
-      setError(null);
-      getTasks(buildParams(1, pageSize, searchQuery, statusFilter, fromDate, toDate))
-        .then((result) => {
-          setTasks(result.items);
-          setTotalPages(result.totalPages);
-          setLoading(false);
+    const onMarkDone = useCallback((task: Task): void => {
+      if (task.status === 'DONE') {
+        return;
+      }
+      setActionLoadingId(task.id);
+      const previous = tasks;
+      setTasks((items) =>
+        items.map((item) => (item.id === task.id ? { ...item, status: 'DONE' as const } : item)),
+      );
+      updateTask(task.id, {
+        title: undefined,
+        description: undefined,
+        status: 'DONE',
+        dueAt: undefined,
+      })
+        .catch((err: Error) => {
+          setTasks(previous);
+          setError(err.message);
+        })
+        .finally(() => {
+          setActionLoadingId(null);
+        });
+    }, [tasks]);
+
+    const onSnooze = useCallback((task: Task): void => {
+      const base = task.dueAt === null ? new Date() : new Date(task.dueAt);
+      base.setUTCDate(base.getUTCDate() + 1);
+      setActionLoadingId(task.id);
+      updateTask(task.id, {
+        title: undefined,
+        description: undefined,
+        status: undefined,
+        dueAt: base.toISOString(),
+      })
+        .then((updated) => {
+          setTasks((items) => items.map((item) => (item.id === task.id ? updated : item)));
         })
         .catch((err: Error) => {
           setError(err.message);
-          setLoading(false);
+        })
+        .finally(() => {
+          setActionLoadingId(null);
         });
-    }, [pageSize, searchQuery, statusFilter, fromDate, toDate]);
+    }, []);
+
+    const onStartFocus = useCallback((task: Task): void => {
+      setActionLoadingId(task.id);
+      startFocusSession(task.id)
+        .catch((err: Error) => {
+          setError(err.message);
+        })
+        .finally(() => {
+          setActionLoadingId(null);
+        });
+    }, []);
 
     const goToPage = useCallback(
       (p: number): void => {
@@ -181,12 +238,35 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
               placeholder="Status"
               disabled={false}
               className="filter-select"
-              onChange={(value) => setStatusFilter(value as TaskStatus | '')}
+              onChange={(value) => {
+                setStatusFilter(value as TaskStatus | '');
+                setPage(1);
+              }}
+            />
+            <Select
+              value={`${sort}:${order}`}
+              options={[
+                { value: 'dueAt:asc', label: 'Due soon' },
+                { value: 'dueAt:desc', label: 'Overdue first' },
+                { value: 'createdAt:desc', label: 'Recently added' },
+              ]}
+              placeholder="Sort"
+              disabled={false}
+              className="filter-select"
+              onChange={(value) => {
+                const [nextSort, nextOrder] = value.split(':');
+                setSort(nextSort === 'dueAt' ? 'dueAt' : 'createdAt');
+                setOrder(nextOrder === 'asc' ? 'asc' : 'desc');
+                setPage(1);
+              }}
             />
             <input
               type="date"
               value={fromDate}
-              onChange={(event) => setFromDate(event.target.value)}
+              onChange={(event) => {
+                setFromDate(event.target.value);
+                setPage(1);
+              }}
               className="date-input"
               title="From"
             />
@@ -194,7 +274,10 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
             <input
               type="date"
               value={toDate}
-              onChange={(event) => setToDate(event.target.value)}
+              onChange={(event) => {
+                setToDate(event.target.value);
+                setPage(1);
+              }}
               className="date-input"
               title="To"
             />
@@ -211,23 +294,27 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
             >
               Clear
             </Button>
-            <Button
-              type="button"
-              fill="solid"
-              size="small"
-              expand={undefined}
-              color="default"
-              disabled={false}
-              className={undefined}
-              aria-label={undefined}
-              onClick={applyFilters}
-            >
-              Apply
-            </Button>
           </div>
         </section>
 
-        {error !== null ? <div className="error-banner">{error}</div> : null}
+        {error !== null ? (
+          <div className="error-banner">
+            <span>{error}</span>
+            <Button
+              type="button"
+              fill="clear"
+              size="small"
+              expand={undefined}
+              color="default"
+              disabled={loading}
+              className={undefined}
+              aria-label="Retry loading tasks"
+              onClick={load}
+            >
+              Retry
+            </Button>
+          </div>
+        ) : null}
 
         {!loading && tasks.length > 0 ? (
           <div className="progress-bar-wrap">
@@ -271,7 +358,46 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
                       size="small"
                       expand={undefined}
                       color="default"
-                      disabled={false}
+                      disabled={actionLoadingId === task.id}
+                      className={undefined}
+                      aria-label={undefined}
+                      onClick={() => onMarkDone(task)}
+                    >
+                      Done
+                    </Button>
+                    <Button
+                      type="button"
+                      fill="clear"
+                      size="small"
+                      expand={undefined}
+                      color="default"
+                      disabled={actionLoadingId === task.id}
+                      className={undefined}
+                      aria-label={undefined}
+                      onClick={() => onSnooze(task)}
+                    >
+                      Snooze
+                    </Button>
+                    <Button
+                      type="button"
+                      fill="clear"
+                      size="small"
+                      expand={undefined}
+                      color="default"
+                      disabled={actionLoadingId === task.id}
+                      className={undefined}
+                      aria-label={undefined}
+                      onClick={() => onStartFocus(task)}
+                    >
+                      Focus
+                    </Button>
+                    <Button
+                      type="button"
+                      fill="clear"
+                      size="small"
+                      expand={undefined}
+                      color="default"
+                      disabled={actionLoadingId === task.id}
                       className={undefined}
                       aria-label={undefined}
                       onClick={() => props.onEditTask(task)}
@@ -284,7 +410,7 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
                       size="small"
                       expand={undefined}
                       color="danger"
-                      disabled={false}
+                      disabled={actionLoadingId === task.id}
                       className={undefined}
                       aria-label={undefined}
                       onClick={() => props.onDeleteTask(task)}
@@ -297,7 +423,11 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
             </article>
           ))}
           {!loading && tasks.length === 0 ? (
-            <div className="empty-state">No tasks yet</div>
+            <div className="empty-state">
+              {statusFilter !== '' || searchQuery.trim().length > 0 || fromDate.length > 0 || toDate.length > 0
+                ? 'No tasks match this filter. Clear filters to see all tasks.'
+                : 'No tasks yet. Create your first task to start onboarding.'}
+            </div>
           ) : null}
         </div>
 

@@ -45,7 +45,7 @@ export function RegisterPage(): ReactElement {
     const nameOrUndefined = trimmedName.length > 0 ? trimmedName : undefined;
     try {
       await auth.register(email, password, nameOrUndefined);
-      navigate('/dashboard', { replace: true });
+      navigate('/today', { replace: true });
     } catch (err: unknown) {
       setLoading(false);
       const message = err instanceof Error ? err.message : 'Registration failed';

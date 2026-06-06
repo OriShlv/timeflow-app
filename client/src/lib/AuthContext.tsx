@@ -71,11 +71,7 @@ export function AuthProvider(props: AuthProviderProps): ReactElement {
   }, []);
 
   const isLoggedIn = useCallback((): boolean => {
-    const loggedIn = authLib.isLoggedIn();
-    if (!loggedIn && user !== null) {
-      setUser(null);
-    }
-    return loggedIn;
+    return user !== null;
   }, [user]);
 
   const value = useMemo(

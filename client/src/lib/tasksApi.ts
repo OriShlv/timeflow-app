@@ -1,6 +1,7 @@
 import { apiRequest } from './apiClient';
 import type {
   CreateTaskBody,
+  FocusSession,
   ListTasksParams,
   ListTasksResult,
   Task,
@@ -80,4 +81,17 @@ export async function deleteTask(id: string): Promise<void> {
     body: undefined,
     includeAuth: true,
   });
+}
+
+export async function startFocusSession(taskId: string): Promise<FocusSession> {
+  const response = await apiRequest<{ ok: boolean; session: FocusSession }>({
+    method: 'POST',
+    path: '/focus-sessions/start',
+    body: {
+      taskId,
+      source: 'tasks_quick_action',
+    },
+    includeAuth: true,
+  });
+  return response.session;
 }

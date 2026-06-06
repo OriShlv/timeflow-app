@@ -14,6 +14,7 @@ import { featuresRouter } from '../modules/features/features.routes';
 import { segmentRouter } from '../modules/segment/segment.routes';
 import { opsRouter } from '../modules/ops/ops.routes';
 import { insightsRouter } from '../modules/insights/insights.routes';
+import { focusSessionsRouter } from '../modules/focus-sessions/focus-sessions.routes';
 
 export function createServer() {
   const app = express();
@@ -35,6 +36,7 @@ export function createServer() {
   app.use('/segment', segmentRouter);
   app.use('/ops', opsRouter);
   app.use('/insights', insightsRouter);
+  app.use('/focus-sessions', focusSessionsRouter);
   app.use(errorHandler);
 
   return app;

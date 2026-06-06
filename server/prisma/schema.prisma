@@ -13,6 +13,12 @@ enum TaskStatus {
   CANCELED
 }
 
+enum FocusSessionStatus {
+  RUNNING
+  COMPLETED
+  CANCELED
+}
+
 model User {
   id              String   @id @default(cuid())
   email           String   @unique
@@ -23,6 +29,7 @@ model User {
   segment         UserSegment?
 
   tasks           Task[]
+  focusSessions   FocusSession[]
   events          TaskEvent[]
   dailyStats      DailyUserStats[]
   recommendations UserRecommendation[]
@@ -42,10 +49,33 @@ model Task {
 
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   events      TaskEvent[]
+  focusSessions FocusSession[]
 
   @@index([userId, createdAt])
   @@index([userId, status])
   @@index([userId, dueAt])
+}
+
+model FocusSession {
+  id             String             @id @default(cuid())
+  userId         String
+  taskId         String?
+  status         FocusSessionStatus @default(RUNNING)
+  startedAt      DateTime
+  endedAt        DateTime?
+  plannedMinutes Int?
+  actualMinutes  Int                @default(0)
+  source         String             @default("manual")
+  notes          String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task           Task?              @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([userId, startedAt])
+  @@index([userId, status])
+  @@index([taskId, startedAt])
 }
 
 model TaskEvent {

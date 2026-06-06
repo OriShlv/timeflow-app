@@ -77,6 +77,8 @@ export interface InsightsSegment {
 
 export interface InsightsRecommendation {
   id: string;
+  type: string;
+  score: number;
   message: string;
   evidence: unknown;
   expiresAt: string | null;
@@ -106,4 +108,66 @@ export interface Insights {
   segment: InsightsSegment | null;
   daily: InsightsDaily | null;
   recommendations: InsightsRecommendation[];
+}
+
+export type FocusSessionStatus = 'RUNNING' | 'COMPLETED' | 'CANCELED';
+
+export interface FocusSession {
+  id: string;
+  userId: string;
+  taskId: string | null;
+  status: FocusSessionStatus;
+  startedAt: string;
+  endedAt: string | null;
+  plannedMinutes: number | null;
+  actualMinutes: number;
+  source: string;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FocusSessionTaskSummary {
+  taskId: string | null;
+  minutes: number;
+  sessionsCount: number;
+}
+
+export interface DailyFocusSummary {
+  day: string;
+  totalMinutes: number;
+  sessionsCount: number;
+  completedSessionsCount: number;
+  byTask: FocusSessionTaskSummary[];
+}
+
+export interface ListFocusSessionsParams {
+  from?: string;
+  to?: string;
+  taskId?: string;
+  status?: FocusSessionStatus;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface ListFocusSessionsResult {
+  items: FocusSession[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface DailyFeatureRow {
+  day: string;
+  createdCount: number;
+  completedCount: number;
+  completionRate: number;
+  tasksWithDueAt: number;
+  overdueCount: number;
+  avgCompletionLagH: number;
+  createdMorning: number;
+  createdAfternoon: number;
+  createdEvening: number;
+  createdNight: number;
 }

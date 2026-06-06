@@ -6,7 +6,7 @@ import { useAuth } from '../../lib/AuthContext';
 export function RedirectIfLoggedIn(): ReactElement {
   const auth = useAuth();
   if (auth.isLoggedIn()) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/today" replace />;
   }
   return <Outlet />;
 }
