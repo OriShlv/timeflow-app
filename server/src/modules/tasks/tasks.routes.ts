@@ -8,6 +8,7 @@ import {
 } from './tasks.schemas';
 import { createTask, deleteTask, listTasks, updateTask } from './tasks.service';
 import { TaskStatus } from '@prisma/client';
+import { HttpError } from '../../app/errors/http-error';
 
 export const tasksRouter = Router();
 
@@ -54,7 +55,7 @@ tasksRouter.get('/', async (req: AuthedRequest, res, next) => {
 tasksRouter.patch('/:id', async (req: AuthedRequest, res, next) => {
   try {
     const body = updateTaskSchema.parse(req.body);
-    const id = req.params.id;
+    const id = getTaskIdParam(req.params.id);
 
     const updated = await updateTask(req.user!.id, id, {
       ...(body.title !== undefined ? { title: body.title } : {}),
@@ -75,7 +76,7 @@ tasksRouter.patch('/:id', async (req: AuthedRequest, res, next) => {
 
 tasksRouter.delete('/:id', async (req: AuthedRequest, res, next) => {
   try {
-    const id = req.params.id;
+    const id = getTaskIdParam(req.params.id);
     const ok = await deleteTask(req.user!.id, id);
 
     if (!ok) {
@@ -87,3 +88,11 @@ tasksRouter.delete('/:id', async (req: AuthedRequest, res, next) => {
     next(err);
   }
 });
+
+function getTaskIdParam(id: string | string[] | undefined): string {
+  if (typeof id !== 'string') {
+    throw new HttpError(400, 'InvalidTaskId', 'Task id route parameter must be a string');
+  }
+
+  return id;
+}

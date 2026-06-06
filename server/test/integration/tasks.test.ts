@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { createServer } from '../../src/app/server';
 import { env } from '../../src/config/env';
 import { prisma } from '../../src/db/prisma';
+import { redis } from '../../src/queue/redis';
 
 const app = createServer();
 
@@ -34,6 +35,10 @@ describe('Tasks API', () => {
     await prisma.task.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
     await prisma.taskEvent.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
     await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('POST /tasks', () => {
@@ -95,6 +100,26 @@ describe('Tasks API', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .send({ title: '' })
         .expect(400);
+    });
+
+    it('returns created task when event publish fails after commit', async () => {
+      vi.spyOn(redis, 'xadd').mockRejectedValueOnce(new Error('redis unavailable'));
+
+      const res = await request(app)
+        .post('/tasks')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ title: 'Created while redis is down' })
+        .expect(201);
+
+      const event = await prisma.taskEvent.findFirst({
+        where: { taskId: res.body.task.id, type: 'TASK_CREATED' },
+      });
+
+      expect(res.body.ok).toBe(true);
+      expect(res.body.task.title).toBe('Created while redis is down');
+      expect(event?.processedAt).toBeNull();
+      expect(event?.attempts).toBe(1);
+      expect(event?.lastError).toContain('redis unavailable');
     });
   });
 
@@ -179,6 +204,29 @@ describe('Tasks API', () => {
         .expect(404);
 
       expect(res.body.error).toBe('TaskNotFound');
+    });
+
+    it('returns updated task when completion event publish fails after commit', async () => {
+      const task = await prisma.task.create({
+        data: { userId, title: 'Complete while redis is down', status: 'PENDING' },
+      });
+      vi.spyOn(redis, 'xadd').mockRejectedValueOnce(new Error('redis unavailable'));
+
+      const res = await request(app)
+        .patch(`/tasks/${task.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ status: 'DONE' })
+        .expect(200);
+
+      const event = await prisma.taskEvent.findFirst({
+        where: { taskId: task.id, type: 'TASK_COMPLETED' },
+      });
+
+      expect(res.body.ok).toBe(true);
+      expect(res.body.task.status).toBe('DONE');
+      expect(event?.processedAt).toBeNull();
+      expect(event?.attempts).toBe(1);
+      expect(event?.lastError).toContain('redis unavailable');
     });
   });
 

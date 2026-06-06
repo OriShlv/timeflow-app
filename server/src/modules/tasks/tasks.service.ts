@@ -2,6 +2,7 @@ import { prisma } from '../../db/prisma';
 import { TaskStatus } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 import { publishEventById } from '../../events/publisher';
+import { HttpError } from '../../app/errors/http-error';
 
 type ListParams = {
   userId: string;
@@ -52,7 +53,7 @@ export async function createTask(
   });
 
   if (eventId) {
-    await publishEventById(eventId);
+    await publishTaskEventAfterCommit(eventId);
   }
 
   return task;
@@ -156,7 +157,7 @@ export async function updateTask(userId: string, taskId: string, data: Prisma.Ta
   }
 
   if (result.eventId) {
-    await publishEventById(result.eventId);
+    await publishTaskEventAfterCommit(result.eventId);
   }
 
   return result.updatedTask;
@@ -170,6 +171,24 @@ export async function deleteTask(userId: string, taskId: string) {
 
   await prisma.task.delete({ where: { id: taskId } });
   return true;
+}
+
+async function publishTaskEventAfterCommit(eventId: string) {
+  try {
+    await publishEventById(eventId);
+  } catch (e) {
+    if (e instanceof HttpError && e.code === 'TaskEventPublishFailed') {
+      // The task write has committed; the TaskEvent row keeps lastError for recovery.
+      // eslint-disable-next-line no-console
+      console.warn('[tasks] task event publish failed after commit', {
+        eventId,
+        errorMessage: e.message,
+      });
+      return;
+    }
+
+    throw e;
+  }
 }
 
 async function createTaskEvent(
