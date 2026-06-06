@@ -274,6 +274,10 @@ async function createTaskEvent(
     dedupeKey: string;
   },
 ) {
+  if (params.taskId === undefined) {
+    return null;
+  }
+
   try {
     return await tx.taskEvent.create({
       data: {
