@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import type { FocusSessionStatus } from '@prisma/client';
 import { requireAuth, type AuthedRequest } from '../../app/middleware/require-auth';
+import { HttpError } from '../../app/errors/http-error';
 import {
   cancelFocusSessionSchema,
   dailySummaryQuerySchema,
@@ -19,6 +20,13 @@ import {
 
 export const focusSessionsRouter = Router();
 focusSessionsRouter.use(requireAuth);
+
+function getRouteParam(value: string | string[], name: string): string {
+  if (typeof value !== 'string') {
+    throw new HttpError(400, 'InvalidRouteParam', `Expected ${name} route param to be a string`);
+  }
+  return value;
+}
 
 focusSessionsRouter.get('/', async (req: AuthedRequest, res, next) => {
   try {
@@ -68,9 +76,10 @@ focusSessionsRouter.post('/start', async (req: AuthedRequest, res, next) => {
 focusSessionsRouter.post('/:id/stop', async (req: AuthedRequest, res, next) => {
   try {
     const body = stopFocusSessionSchema.parse(req.body);
+    const focusSessionId = getRouteParam(req.params.id, 'id');
     const session = await stopFocusSession({
       userId: req.user!.id,
-      focusSessionId: req.params.id,
+      focusSessionId,
       endedAt: body.endedAt ? new Date(body.endedAt) : new Date(),
     });
     res.json({ ok: true, session });
@@ -82,9 +91,10 @@ focusSessionsRouter.post('/:id/stop', async (req: AuthedRequest, res, next) => {
 focusSessionsRouter.post('/:id/cancel', async (req: AuthedRequest, res, next) => {
   try {
     const body = cancelFocusSessionSchema.parse(req.body);
+    const focusSessionId = getRouteParam(req.params.id, 'id');
     const session = await cancelFocusSession({
       userId: req.user!.id,
-      focusSessionId: req.params.id,
+      focusSessionId,
       endedAt: body.endedAt ? new Date(body.endedAt) : new Date(),
       notes: body.notes,
     });
