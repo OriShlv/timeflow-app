@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { dateKeyInTimezone, formatUtcDate } from './dateFormat';
+import { dateKeyInTimezone, formatCalendarDate, formatUtcDate } from './dateFormat';
 
 describe('dateFormat timezone helpers', () => {
   it('builds date keys from the requested timezone', () => {
@@ -18,5 +18,15 @@ describe('dateFormat timezone helpers', () => {
     });
 
     expect(formatted).toContain('Jun 7');
+  });
+
+  it('formats calendar dates without applying timezone offset shifts', () => {
+    const formatted = formatCalendarDate(new Date(2026, 5, 7), 'en', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    expect(formatted).toContain('June 7');
   });
 });

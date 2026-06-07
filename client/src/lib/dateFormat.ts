@@ -40,6 +40,15 @@ export function formatUtcDate(
   return date.toLocaleDateString(language, { ...options, timeZone: 'UTC' });
 }
 
+export function formatCalendarDate(
+  value: Date,
+  language: AppLanguage,
+  options: DateFormatOptions,
+): string {
+  const date = new Date(Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()));
+  return date.toLocaleDateString(language, { ...options, timeZone: 'UTC' });
+}
+
 export function formatTime(
   value: string | Date,
   timezone: string,

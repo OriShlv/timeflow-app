@@ -1,6 +1,6 @@
 import { useMemo, type ReactElement } from 'react';
 
-import { dateKeyInTimezone } from '../../lib/dateFormat';
+import { dateKeyInTimezone, formatCalendarDate } from '../../lib/dateFormat';
 import { useUserPreferences } from '../../lib/useUserPreferences';
 import type { Task } from '../../lib/types';
 import './TaskCalendar.css';
@@ -52,11 +52,7 @@ function groupTasksByDueDate(tasks: Task[], timezone: string): Map<string, Task[
 }
 
 function monthLabel(year: number, month: number, language: 'en' | 'he'): string {
-  return new Intl.DateTimeFormat(language, {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(Date.UTC(year, month, 1)));
+  return formatCalendarDate(new Date(year, month, 1), language, { month: 'long', year: 'numeric' });
 }
 
 function shiftMonth(year: number, month: number, delta: number): { year: number; month: number } {

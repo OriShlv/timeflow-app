@@ -9,7 +9,7 @@ import { TaskCalendar, tasksForDate } from '../features/home/TaskCalendar';
 import { TaskForm } from '../features/tasks/TaskForm';
 import { useAuth } from '../lib/AuthContext';
 import { toUiErrorMessage } from '../lib/apiFeedback';
-import { formatDate, formatTime, hourInTimezone, nowInTimezone } from '../lib/dateFormat';
+import { formatCalendarDate, formatDate, formatTime, hourInTimezone, nowInTimezone } from '../lib/dateFormat';
 import { useT } from '../lib/i18n/I18nContext';
 import { getDailyFocusSummary } from '../lib/focusSessionsApi';
 import { getInsights } from '../lib/insightsApi';
@@ -31,6 +31,10 @@ function greetingForHour(hour: number, t: (key: string) => string): string {
 
 function formatSelectedDate(date: Date, timezone: string, language: 'en' | 'he'): string {
   return formatDate(date, timezone, language, { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function formatSelectedCalendarDate(date: Date, language: 'en' | 'he'): string {
+  return formatCalendarDate(date, language, { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
 function formatDueTime(value: string, timezone: string, language: 'en' | 'he'): string {
@@ -183,7 +187,7 @@ export function HomePage(): ReactElement {
                 />
                 <section className="home-day-panel" aria-label="Tasks for selected day">
                   <div className="home-day-panel__header">
-                    <h2 className="home-day-panel__title">{formatSelectedDate(selectedDate, timezone, language)}</h2>
+                    <h2 className="home-day-panel__title">{formatSelectedCalendarDate(selectedDate, language)}</h2>
                     <Button
                       type="button"
                       fill="outline"
