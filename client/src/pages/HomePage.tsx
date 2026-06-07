@@ -9,7 +9,7 @@ import { TaskCalendar, tasksForDate } from '../features/home/TaskCalendar';
 import { TaskForm } from '../features/tasks/TaskForm';
 import { useAuth } from '../lib/AuthContext';
 import { toUiErrorMessage } from '../lib/apiFeedback';
-import { formatDate, formatTime, hourInTimezone } from '../lib/dateFormat';
+import { formatDate, formatTime, hourInTimezone, nowInTimezone } from '../lib/dateFormat';
 import { useT } from '../lib/i18n/I18nContext';
 import { getDailyFocusSummary } from '../lib/focusSessionsApi';
 import { getInsights } from '../lib/insightsApi';
@@ -43,15 +43,16 @@ export function HomePage(): ReactElement {
   const { timezone, language } = useUserPreferences();
   const navigate = useNavigate();
   const now = useMemo(() => new Date(), []);
+  const todayInTimezone = useMemo(() => nowInTimezone(timezone), [timezone]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [summary, setSummary] = useState<TaskSummary | null>(null);
   const [recommendations, setRecommendations] = useState<InsightsRecommendation[]>([]);
   const [focusSummary, setFocusSummary] = useState<DailyFocusSummary | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
-  const [viewYear, setViewYear] = useState<number>(() => now.getFullYear());
-  const [viewMonth, setViewMonth] = useState<number>(() => now.getMonth());
+  const [selectedDate, setSelectedDate] = useState<Date>(() => todayInTimezone);
+  const [viewYear, setViewYear] = useState<number>(() => todayInTimezone.getFullYear());
+  const [viewMonth, setViewMonth] = useState<number>(() => todayInTimezone.getMonth());
   const [taskFormOpen, setTaskFormOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>('');
 
@@ -115,7 +116,7 @@ export function HomePage(): ReactElement {
     setToastMessage(t('home.toast.created'));
   }, [load, t]);
 
-  const selectedTasks = useMemo(() => tasksForDate(tasks, selectedDate), [tasks, selectedDate]);
+  const selectedTasks = useMemo(() => tasksForDate(tasks, selectedDate, timezone), [tasks, selectedDate, timezone]);
   const displayName = auth.user?.name ?? auth.user?.email?.split('@')[0] ?? 'there';
 
   return (

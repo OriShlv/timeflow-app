@@ -31,6 +31,15 @@ export function formatDate(
   return date.toLocaleDateString(language, { ...options, timeZone: timezone });
 }
 
+export function formatUtcDate(
+  value: string | Date,
+  language: AppLanguage,
+  options: DateFormatOptions,
+): string {
+  const date = value instanceof Date ? value : new Date(value);
+  return date.toLocaleDateString(language, { ...options, timeZone: 'UTC' });
+}
+
 export function formatTime(
   value: string | Date,
   timezone: string,
@@ -39,6 +48,26 @@ export function formatTime(
 ): string {
   const date = value instanceof Date ? value : new Date(value);
   return date.toLocaleTimeString(language, { ...options, timeZone: timezone });
+}
+
+export function dateKeyInTimezone(value: string | Date, timezone: string): string {
+  const date = value instanceof Date ? value : new Date(value);
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+
+  const get = (type: Intl.DateTimeFormatPartTypes): string => {
+    const part = parts.find((item) => item.type === type);
+    if (part === undefined) {
+      throw new Error(`Missing ${type} date part for timezone ${timezone}`);
+    }
+    return part.value;
+  };
+
+  return `${get('year')}-${get('month')}-${get('day')}`;
 }
 
 export function nowInTimezone(timezone: string): Date {
