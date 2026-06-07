@@ -1,0 +1,62 @@
+.feature-shortcuts__title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--tf-text);
+}
+
+.feature-shortcuts__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.feature-shortcut {
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.feature-shortcut__card {
+  height: 100%;
+  padding: 0.85rem;
+  border-left: 3px solid var(--tf-primary);
+  transition: box-shadow 0.15s ease;
+}
+
+.feature-shortcut:hover .feature-shortcut__card {
+  box-shadow: var(--tf-shadow-card);
+}
+
+.feature-shortcut--today .feature-shortcut__card {
+  border-left-color: var(--tf-primary);
+}
+
+.feature-shortcut--tasks .feature-shortcut__card {
+  border-left-color: var(--tf-accent);
+}
+
+.feature-shortcut--insights .feature-shortcut__card {
+  border-left-color: var(--tf-success);
+}
+
+.feature-shortcut--profile .feature-shortcut__card {
+  border-left-color: var(--tf-warning);
+}
+
+.feature-shortcut__name {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--tf-text);
+}
+
+.feature-shortcut__desc {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--tf-text-muted);
+  line-height: 1.35;
+}

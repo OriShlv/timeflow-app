@@ -1,0 +1,48 @@
+.agent-placeholder__card {
+  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--tf-primary) 8%, var(--tf-card)),
+    color-mix(in srgb, var(--tf-accent) 6%, var(--tf-card))
+  );
+  border: 1px dashed color-mix(in srgb, var(--tf-primary) 35%, var(--tf-border));
+}
+
+.agent-placeholder__badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--tf-primary-light);
+  color: var(--tf-primary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.agent-placeholder__title {
+  margin: 0.65rem 0 0.35rem;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--tf-text);
+}
+
+.agent-placeholder__text {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--tf-text-muted);
+}
+
+.agent-placeholder__cta {
+  margin-top: 0.85rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius-sm);
+  background: var(--tf-card);
+  color: var(--tf-text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: not-allowed;
+  opacity: 0.7;
+}

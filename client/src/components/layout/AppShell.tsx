@@ -60,7 +60,7 @@ function AppShellContent(): ReactElement {
   const focus = useFocusSession();
   const hasActiveFocus = focus.activeSession !== null;
   const hideFocusBar =
-    location.pathname === '/today' || location.pathname === '/tasks';
+    location.pathname === '/dashboard' || location.pathname === '/today' || location.pathname === '/tasks';
   const showFocusBar = hasActiveFocus && !hideFocusBar;
 
   const onLogout = useCallback((): void => {
@@ -85,6 +85,12 @@ function AppShellContent(): ReactElement {
         </div>
         {showFocusBar ? <ActiveFocusBar /> : null}
         <nav className="app-tabs" aria-label="Main navigation">
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) => `app-tab ${isActive ? 'app-tab--active' : ''}`}
+          >
+            Home
+          </NavLink>
           <NavLink
             to="/today"
             className={({ isActive }) => `app-tab ${isActive ? 'app-tab--active' : ''}`}

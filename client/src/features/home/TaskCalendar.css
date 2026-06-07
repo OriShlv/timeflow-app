@@ -1,0 +1,123 @@
+.task-calendar {
+  background: var(--tf-card);
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius);
+  padding: 1rem;
+  box-shadow: var(--tf-shadow-card);
+}
+
+.task-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.task-calendar__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--tf-text);
+}
+
+.task-calendar__nav {
+  display: flex;
+  gap: 4px;
+}
+
+.task-calendar__nav-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius-sm);
+  background: var(--tf-card);
+  color: var(--tf-text);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.task-calendar__nav-btn:hover {
+  border-color: var(--tf-primary);
+  color: var(--tf-primary);
+}
+
+.task-calendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.task-calendar__weekday {
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tf-text-muted);
+}
+
+.task-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.task-calendar__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  min-height: 52px;
+  padding: 6px 4px;
+  border: 1px solid transparent;
+  border-radius: var(--tf-radius-sm);
+  background: transparent;
+  cursor: pointer;
+}
+
+.task-calendar__day:hover {
+  background: var(--tf-primary-light);
+}
+
+.task-calendar__day--muted .task-calendar__day-num {
+  color: var(--tf-text-muted);
+  opacity: 0.5;
+}
+
+.task-calendar__day--today {
+  border-color: color-mix(in srgb, var(--tf-primary) 35%, transparent);
+  background: var(--tf-primary-light);
+}
+
+.task-calendar__day--selected {
+  border-color: var(--tf-primary);
+  background: color-mix(in srgb, var(--tf-primary) 12%, var(--tf-card));
+}
+
+.task-calendar__day-num {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tf-text);
+}
+
+.task-calendar__markers {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.task-calendar__marker {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tf-primary);
+}
+
+.task-calendar__marker--overdue {
+  background: var(--tf-danger);
+}
