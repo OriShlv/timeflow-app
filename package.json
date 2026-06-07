@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "bun scripts/dev.ts"
+    "dev": "bun scripts/dev.ts",
+    "dev:demo": "bun run --cwd server dev:demo",
+    "seed:demo": "bun run --cwd server seed:demo",
+    "seed:recommendations": "bun run --cwd server seed:recommendations"
   }
 }

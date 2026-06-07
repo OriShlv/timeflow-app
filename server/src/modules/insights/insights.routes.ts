@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../../db/prisma';
 import { requireAuth, AuthedRequest } from '../../app/middleware/require-auth';
+import { refreshRecommendationsForUser } from '../recommendations/recommendations.service';
 
 export const insightsRouter = Router();
 
@@ -8,6 +9,8 @@ insightsRouter.get('/', requireAuth, async (req: AuthedRequest, res, next) => {
   try {
     const userId = req.user!.id;
     const now = new Date();
+
+    await refreshRecommendationsForUser(userId, now);
 
     const [segment, latestDaily, recommendations, total, done, pending, canceled, overdue] =
       await Promise.all([

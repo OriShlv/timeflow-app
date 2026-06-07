@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Fab, Modal, Toast } from '../components/ui';
 import { AgentPlaceholder } from '../features/home/AgentPlaceholder';
 import { FeatureShortcuts } from '../features/home/FeatureShortcuts';
+import { HomeRecommendations } from '../features/home/HomeRecommendations';
 import { TaskCalendar, tasksForDate } from '../features/home/TaskCalendar';
 import { TaskForm } from '../features/tasks/TaskForm';
 import { useAuth } from '../lib/AuthContext';
@@ -12,7 +13,7 @@ import { getDailyFocusSummary } from '../lib/focusSessionsApi';
 import { getInsights } from '../lib/insightsApi';
 import { getTasks } from '../lib/tasksApi';
 import { subscribeTasksRefresh } from '../lib/tasksRefresh';
-import type { DailyFocusSummary, Task, TaskSummary } from '../lib/types';
+import type { DailyFocusSummary, InsightsRecommendation, Task, TaskSummary } from '../lib/types';
 import './HomePage.css';
 
 function greetingForHour(hour: number): string {
@@ -39,6 +40,7 @@ export function HomePage(): ReactElement {
   const now = useMemo(() => new Date(), []);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [summary, setSummary] = useState<TaskSummary | null>(null);
+  const [recommendations, setRecommendations] = useState<InsightsRecommendation[]>([]);
   const [focusSummary, setFocusSummary] = useState<DailyFocusSummary | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +78,7 @@ export function HomePage(): ReactElement {
       .then(([pendingTasks, insights, focus]) => {
         setTasks(pendingTasks);
         setSummary(insights.taskSummary);
+        setRecommendations(insights.recommendations);
         setFocusSummary(focus);
       })
       .catch((err: unknown) => {
@@ -206,6 +209,7 @@ export function HomePage(): ReactElement {
                 </section>
               </div>
               <aside className="home-page__aside">
+                <HomeRecommendations recommendations={recommendations} />
                 <FeatureShortcuts />
                 <AgentPlaceholder />
               </aside>

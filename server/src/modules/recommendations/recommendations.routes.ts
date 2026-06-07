@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../../db/prisma';
 import { requireAuth, AuthedRequest } from '../../app/middleware/require-auth';
+import { refreshRecommendationsForUser } from './recommendations.service';
 
 export const recommendationsRouter = Router();
 recommendationsRouter.use(requireAuth);
@@ -8,6 +9,7 @@ recommendationsRouter.use(requireAuth);
 recommendationsRouter.get('/', async (req: AuthedRequest, res, next) => {
   try {
     const now = new Date();
+    await refreshRecommendationsForUser(req.user!.id, now);
 
     const items = await prisma.userRecommendation.findMany({
       where: {
