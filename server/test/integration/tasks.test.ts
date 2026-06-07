@@ -227,6 +227,29 @@ describe('Tasks API', () => {
       expect(stillExists).not.toBeNull();
       expect(stillExists?.userId).toBe(otherUserId);
     });
+
+    it('preserves subtasks when deleting their parent task', async () => {
+      const parent = await prisma.task.create({
+        data: { userId, title: 'Parent task', status: 'PENDING' },
+      });
+      const subtask = await prisma.task.create({
+        data: {
+          userId,
+          title: 'Subtask to keep',
+          status: 'PENDING',
+          parentTaskId: parent.id,
+        },
+      });
+
+      await request(app)
+        .delete(`/tasks/${parent.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(204);
+
+      const preservedSubtask = await prisma.task.findUnique({ where: { id: subtask.id } });
+      expect(preservedSubtask).not.toBeNull();
+      expect(preservedSubtask?.parentTaskId).toBeNull();
+    });
   });
 
   describe('Ownership isolation', () => {
