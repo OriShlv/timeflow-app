@@ -11,6 +11,7 @@ import { toUiErrorMessage } from '../lib/apiFeedback';
 import { getDailyFocusSummary } from '../lib/focusSessionsApi';
 import { getInsights } from '../lib/insightsApi';
 import { getTasks } from '../lib/tasksApi';
+import { subscribeTasksRefresh } from '../lib/tasksRefresh';
 import type { DailyFocusSummary, Task, TaskSummary } from '../lib/types';
 import './HomePage.css';
 
@@ -87,6 +88,12 @@ export function HomePage(): ReactElement {
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  useEffect(() => {
+    return subscribeTasksRefresh(() => {
+      load();
+    });
   }, [load]);
 
   const onViewMonthChange = useCallback((year: number, month: number): void => {

@@ -1,12 +1,20 @@
 import type { ReactElement } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { BarChart3, List, Plus, X } from 'lucide-react';
+import { BarChart3, List, Minus, Plus, Sparkles, X } from 'lucide-react';
 
-export type IconName = 'add' | 'close' | 'stats-chart-outline' | 'list-outline';
+export type IconName =
+  | 'add'
+  | 'close'
+  | 'minimize'
+  | 'sparkles'
+  | 'stats-chart-outline'
+  | 'list-outline';
 
 const ICON_MAP: Record<IconName, LucideIcon> = {
   add: Plus,
   close: X,
+  minimize: Minus,
+  sparkles: Sparkles,
   'stats-chart-outline': BarChart3,
   'list-outline': List,
 };

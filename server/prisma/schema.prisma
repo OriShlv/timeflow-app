@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum TaskStatus {
@@ -44,16 +44,20 @@ model Task {
   description String?
   status      TaskStatus @default(PENDING)
   dueAt       DateTime?
+  parentTaskId String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent      Task?      @relation("TaskSubtasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subtasks    Task[]     @relation("TaskSubtasks")
   events      TaskEvent[]
   focusSessions FocusSession[]
 
   @@index([userId, createdAt])
   @@index([userId, status])
   @@index([userId, dueAt])
+  @@index([userId, parentTaskId])
 }
 
 model FocusSession {

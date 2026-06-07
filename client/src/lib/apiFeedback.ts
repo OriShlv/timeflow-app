@@ -8,6 +8,13 @@ const API_ERROR_MESSAGES: Record<string, string> = {
   InvalidFocusSessionEndTime: 'Could not end the focus session because the end time is invalid.',
   TaskNotFound: 'Task not found.',
   Unauthorized: 'Your session expired. Please log in again.',
+  PlannerLlmUnavailable:
+    'The planner AI is unavailable. Make sure Ollama is running and the model is pulled.',
+  PlannerLlmInvalidJson: 'The planner AI returned an invalid response. Try again.',
+  PlannerLlmInvalidShape: 'The planner AI returned an unexpected response. Try again.',
+  ParentTaskNotFound: 'Parent task not found.',
+  ParentTaskNotAllowed: 'Sub-tasks cannot be nested under another sub-task.',
+  InvalidPlannerRequest: 'Invalid planner request.',
 };
 
 export function toUiErrorMessage(error: unknown): string {

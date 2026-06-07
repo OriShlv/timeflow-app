@@ -23,6 +23,8 @@ export interface Task {
   description: string | null;
   status: TaskStatus;
   dueAt: string | null;
+  parentTaskId: string | null;
+  parentTaskTitle: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,6 +38,7 @@ export interface ListTasksParams {
   pageSize?: number;
   sort?: 'createdAt' | 'dueAt';
   order?: 'asc' | 'desc';
+  parentTaskId?: string;
 }
 
 export interface ListTasksResult {
@@ -50,6 +53,7 @@ export interface CreateTaskBody {
   title: string;
   description: string | undefined;
   dueAt: string | undefined;
+  parentTaskId: string | undefined;
 }
 
 export interface UpdateTaskBody {

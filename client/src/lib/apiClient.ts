@@ -38,7 +38,13 @@ async function parseJsonBody<T>(response: Response): Promise<T | undefined> {
   }
 }
 
-function parseErrorMessage(body: { error?: string } | undefined, fallback: string): string {
+function parseErrorMessage(
+  body: { error?: string; message?: string } | undefined,
+  fallback: string,
+): string {
+  if (body?.message !== undefined && body.message.length > 0) {
+    return body.message;
+  }
   return body?.error !== undefined ? body.error : fallback;
 }
 

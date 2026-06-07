@@ -124,6 +124,7 @@ export function TaskForm(props: TaskFormProps): ReactElement {
         title,
         description: descOrUndefined,
         dueAt: dueAtIso,
+        parentTaskId: undefined,
       })
         .then(() => {
           setSaving(false);

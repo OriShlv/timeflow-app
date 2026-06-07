@@ -19,9 +19,9 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     return res.status(err.status).json({
       ok: false,
       error: err.code,
+      message: err.message,
       ...(isDevelopment && {
         debug: {
-          message: err.message,
           path: req.path,
         },
       }),

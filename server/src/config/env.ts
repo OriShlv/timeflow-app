@@ -10,6 +10,8 @@ const envSchema = z.object({
   OPS_ENABLED: z.coerce.boolean().default(false),
   OPS_DEV_ONLY: z.coerce.boolean().default(true),
   OPS_ADMIN_EMAILS: z.string().optional(),
+  OLLAMA_HOST: z.string().url().default('http://127.0.0.1:11434'),
+  OLLAMA_MODEL: z.string().min(1).default('hf.co/Qwen/Qwen2.5-3B-Instruct-GGUF:Q4_K_M'),
 });
 
 const parsed = envSchema.safeParse(process.env);

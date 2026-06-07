@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import type { FocusSessionStatus } from '@prisma/client';
+import type { FocusSessionStatus } from '../../db/client';
 import { requireAuth, type AuthedRequest } from '../../app/middleware/require-auth';
 import {
   cancelFocusSessionSchema,

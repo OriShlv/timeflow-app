@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useState,
   type ReactElement,
 } from 'react';
@@ -12,9 +13,13 @@ import { Button, Searchbar, Select } from '../../components/ui';
 import type { SelectOption } from '../../components/ui/Select';
 import { toUiErrorMessage } from '../../lib/apiFeedback';
 import { useFocusSession } from '../../lib/FocusSessionContext';
+import { usePlannerAgent } from '../../lib/PlannerAgentContext';
 import { getTasks } from '../../lib/tasksApi';
 import { updateTask } from '../../lib/tasksApi';
+import { subscribeTasksRefresh } from '../../lib/tasksRefresh';
 import type { ListTasksParams, Task, TaskStatus } from '../../lib/types';
+import { TaskCard } from './TaskCard';
+import { buildTaskDisplayItems, mergeSubtasks } from './taskDisplay';
 import './TasksList.css';
 
 const STATUS_OPTIONS: SelectOption[] = [
@@ -32,25 +37,6 @@ export type TasksListProps = {
   onEditTask: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
 };
-
-function statusLabel(status: TaskStatus): string {
-  switch (status) {
-    case 'DONE':
-      return 'Done';
-    case 'CANCELED':
-      return 'Canceled';
-    default:
-      return 'Pending';
-  }
-}
-
-function formatDue(dueAt: string): string {
-  const d = new Date(dueAt);
-  return d.toLocaleString(undefined, {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  });
-}
 
 function buildParams(
   page: number,
@@ -89,6 +75,7 @@ function buildParams(
 export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
   function TasksList(props, ref): ReactElement {
     const focus = useFocusSession();
+    const planner = usePlannerAgent();
     const [searchParams] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<TaskStatus | ''>(
@@ -109,6 +96,10 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+    const [expandedParentIds, setExpandedParentIds] = useState<Set<string>>(() => new Set());
+    const [loadedSubtasksByParent, setLoadedSubtasksByParent] = useState<Record<string, Task[]>>({});
+
+    const expandParentFromUrl = searchParams.get('expandParent');
 
     const fetchTasks = useCallback(
       (targetPage: number): void => {
@@ -119,6 +110,7 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
           .then((result) => {
             setTasks(result.items);
             setTotalPages(result.totalPages);
+            setLoadedSubtasksByParent({});
             setLoading(false);
           })
           .catch((err: unknown) => {
@@ -135,9 +127,81 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
 
     useImperativeHandle(ref, () => ({ reload: load }), [load]);
 
+    const loadSubtasksForParent = useCallback(
+      async (parentId: string): Promise<void> => {
+        const params = buildParams(1, 50, searchQuery, statusFilter, fromDate, toDate, sort, order);
+        params.parentTaskId = parentId;
+        const result = await getTasks(params);
+        setLoadedSubtasksByParent((prev) => ({
+          ...prev,
+          [parentId]: result.items,
+        }));
+      },
+      [searchQuery, statusFilter, fromDate, toDate, sort, order],
+    );
+
     useEffect(() => {
       fetchTasks(page);
     }, [fetchTasks, page]);
+
+    useEffect(() => {
+      if (expandParentFromUrl === null || expandParentFromUrl.length === 0) {
+        return;
+      }
+      setExpandedParentIds((prev) => {
+        const next = new Set(prev);
+        next.add(expandParentFromUrl);
+        return next;
+      });
+      loadSubtasksForParent(expandParentFromUrl).catch((err: unknown) => {
+        setError(toUiErrorMessage(err));
+      });
+    }, [expandParentFromUrl, loadSubtasksForParent]);
+
+    useEffect(() => {
+      return subscribeTasksRefresh((detail) => {
+        fetchTasks(page);
+        if (detail.expandParentId !== undefined) {
+          setExpandedParentIds((prev) => {
+            const next = new Set(prev);
+            next.add(detail.expandParentId as string);
+            return next;
+          });
+        }
+      });
+    }, [fetchTasks, page]);
+
+    const mergedTasks = useMemo(() => {
+      const extraSubtasks = Object.values(loadedSubtasksByParent).flat();
+      return mergeSubtasks(tasks, extraSubtasks);
+    }, [tasks, loadedSubtasksByParent]);
+
+    const displayItems = useMemo(() => buildTaskDisplayItems(mergedTasks), [mergedTasks]);
+
+    const onToggleExpand = useCallback(
+      (parentId: string, knownSubtaskCount: number): void => {
+        const isExpanded = expandedParentIds.has(parentId);
+        if (isExpanded) {
+          setExpandedParentIds((prev) => {
+            const next = new Set(prev);
+            next.delete(parentId);
+            return next;
+          });
+          return;
+        }
+        setExpandedParentIds((prev) => {
+          const next = new Set(prev);
+          next.add(parentId);
+          return next;
+        });
+        if (knownSubtaskCount === 0) {
+          loadSubtasksForParent(parentId).catch((err: unknown) => {
+            setError(toUiErrorMessage(err));
+          });
+        }
+      },
+      [expandedParentIds, loadSubtasksForParent],
+    );
 
     const onSearchChange = useCallback((value: string): void => {
       setSearchQuery(value);
@@ -232,6 +296,13 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
         onStartFocus(task);
       },
       [focus, onStartFocus, onStopFocus],
+    );
+
+    const onSplitWithPlanner = useCallback(
+      (task: Task): void => {
+        planner.openPopup({ intent: 'split_task', taskId: task.id, taskTitle: task.title });
+      },
+      [planner],
     );
 
     const goToPage = useCallback(
@@ -359,95 +430,82 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
         ) : null}
 
         <div className="task-cards">
-          {tasks.map((task) => (
-            <article
-              key={task.id}
-              className={`task-card ${task.status === 'DONE' ? 'task-done' : ''} ${focus.isTaskInFocus(task.id) ? 'task-card--in-focus' : ''}`}
-            >
-              <div className="task-card-status" data-status={task.status} />
-              <div className="task-card-body">
-                <h3 className="task-title">{task.title}</h3>
-                {task.description !== null ? (
-                  <p className="task-desc">{task.description}</p>
-                ) : null}
-                {task.dueAt !== null ? (
-                  <p className="task-due">{formatDue(task.dueAt)}</p>
-                ) : null}
-                <div className="task-card-footer">
-                  <span className="status-pill" data-status={task.status}>
-                    {statusLabel(task.status)}
-                  </span>
-                  <div className="task-actions">
-                    <Button
-                      type="button"
-                      fill="clear"
-                      size="small"
-                      expand={undefined}
-                      color="default"
-                      disabled={actionLoadingId === task.id}
-                      className={undefined}
-                      aria-label={undefined}
-                      onClick={() => onMarkDone(task)}
-                    >
-                      Done
-                    </Button>
-                    <Button
-                      type="button"
-                      fill="clear"
-                      size="small"
-                      expand={undefined}
-                      color="default"
-                      disabled={actionLoadingId === task.id}
-                      className={undefined}
-                      aria-label={undefined}
-                      onClick={() => onSnooze(task)}
-                    >
-                      Snooze
-                    </Button>
-                    <Button
-                      type="button"
-                      fill="clear"
-                      size="small"
-                      expand={undefined}
-                      color="default"
-                      disabled={actionLoadingId === task.id || focus.actionLoading}
-                      className={undefined}
-                      aria-label={undefined}
-                      onClick={() => onFocusTaskAction(task)}
-                    >
-                      {focus.isTaskInFocus(task.id) ? 'Stop focus' : 'Focus'}
-                    </Button>
-                    <Button
-                      type="button"
-                      fill="clear"
-                      size="small"
-                      expand={undefined}
-                      color="default"
-                      disabled={actionLoadingId === task.id}
-                      className={undefined}
-                      aria-label={undefined}
-                      onClick={() => props.onEditTask(task)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      type="button"
-                      fill="clear"
-                      size="small"
-                      expand={undefined}
-                      color="danger"
-                      disabled={actionLoadingId === task.id}
-                      className={undefined}
-                      aria-label={undefined}
-                      onClick={() => props.onDeleteTask(task)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
+          {displayItems.map((item) => {
+            if (item.type === 'orphan') {
+              return (
+                <div key={item.task.id} className="task-group">
+                  <TaskCard
+                    task={item.task}
+                    isSubtask={true}
+                    actionLoadingId={actionLoadingId}
+                    isInFocus={focus.isTaskInFocus(item.task.id)}
+                    subtaskCount={undefined}
+                    expanded={undefined}
+                    onToggleExpand={undefined}
+                    focusActionLoading={focus.actionLoading}
+                    onMarkDone={onMarkDone}
+                    onSnooze={onSnooze}
+                    onFocusTaskAction={onFocusTaskAction}
+                    onSplitWithPlanner={onSplitWithPlanner}
+                    onEditTask={props.onEditTask}
+                    onDeleteTask={props.onDeleteTask}
+                  />
                 </div>
+              );
+            }
+
+            const { parent, subtasks } = item.group;
+            const isExpanded = expandedParentIds.has(parent.id);
+            const subtaskCount = subtasks.length;
+
+            return (
+              <div key={parent.id} className="task-group">
+                <TaskCard
+                  task={parent}
+                  isSubtask={false}
+                  actionLoadingId={actionLoadingId}
+                  isInFocus={focus.isTaskInFocus(parent.id)}
+                  subtaskCount={subtaskCount > 0 ? subtaskCount : undefined}
+                  expanded={isExpanded}
+                  onToggleExpand={
+                    subtaskCount > 0
+                      ? () => onToggleExpand(parent.id, subtaskCount)
+                      : undefined
+                  }
+                  focusActionLoading={focus.actionLoading}
+                  onMarkDone={onMarkDone}
+                  onSnooze={onSnooze}
+                  onFocusTaskAction={onFocusTaskAction}
+                  onSplitWithPlanner={onSplitWithPlanner}
+                  onEditTask={props.onEditTask}
+                  onDeleteTask={props.onDeleteTask}
+                />
+                {isExpanded && subtaskCount > 0 ? (
+                  <div className="task-group__subtasks">
+                    {subtasks.map((subtask) => (
+                      <TaskCard
+                        key={subtask.id}
+                        task={subtask}
+                        isSubtask={true}
+                        actionLoadingId={actionLoadingId}
+                        isInFocus={focus.isTaskInFocus(subtask.id)}
+                        subtaskCount={undefined}
+                        expanded={undefined}
+                        onToggleExpand={undefined}
+                        focusActionLoading={focus.actionLoading}
+                        onMarkDone={onMarkDone}
+                        onSnooze={onSnooze}
+                        onFocusTaskAction={onFocusTaskAction}
+                        onSplitWithPlanner={onSplitWithPlanner}
+                        onEditTask={props.onEditTask}
+                        onDeleteTask={props.onDeleteTask}
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
-            </article>
-          ))}
+            );
+          })}
           {!loading && tasks.length === 0 ? (
             <div className="empty-state">
               {statusFilter !== '' || searchQuery.trim().length > 0 || fromDate.length > 0 || toDate.length > 0

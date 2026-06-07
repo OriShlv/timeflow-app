@@ -6,6 +6,7 @@ export const createTaskSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().max(2000).optional(),
   dueAt: z.string().datetime().optional(),
+  parentTaskId: z.string().min(1).max(64).optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -26,6 +27,7 @@ export const listTasksQuerySchema = z.object({
 
   sort: z.enum(['createdAt', 'dueAt']).default('createdAt'),
   order: z.enum(['asc', 'desc']).default('desc'),
+  parentTaskId: z.string().min(1).max(64).optional(),
 });
 
 export function toDateOrUndefined(v?: string) {

@@ -7,7 +7,7 @@ import {
   toDateOrUndefined,
 } from './tasks.schemas';
 import { createTask, deleteTask, listTasks, updateTask } from './tasks.service';
-import { TaskStatus } from '@prisma/client';
+import { TaskStatus } from '../../db/client';
 
 export const tasksRouter = Router();
 
@@ -21,6 +21,7 @@ tasksRouter.post('/', async (req: AuthedRequest, res, next) => {
       title: body.title,
       description: body.description,
       dueAt: body.dueAt ? new Date(body.dueAt) : undefined,
+      parentTaskId: body.parentTaskId,
     });
 
     res.status(201).json({ ok: true, task });
@@ -43,6 +44,7 @@ tasksRouter.get('/', async (req: AuthedRequest, res, next) => {
       pageSize: q.pageSize,
       sort: q.sort,
       order: q.order,
+      parentTaskId: q.parentTaskId,
     });
 
     res.json({ ok: true, ...result });

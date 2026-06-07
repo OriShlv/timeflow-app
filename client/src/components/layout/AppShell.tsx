@@ -2,8 +2,11 @@ import { useCallback, type ReactElement } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { ActiveFocusBar } from '../focus/ActiveFocusBar';
+import { PlannerAgentLauncher } from '../planner/PlannerAgentLauncher';
+import { PlannerAgentPopup } from '../planner/PlannerAgentPopup';
 import { useAuth } from '../../lib/AuthContext';
 import { FocusSessionProvider, useFocusSession } from '../../lib/FocusSessionContext';
+import { PlannerAgentProvider } from '../../lib/PlannerAgentContext';
 import { formatElapsedMs, useFocusClock } from '../../lib/focusSessionTime';
 import './AppShell.css';
 
@@ -84,6 +87,8 @@ function AppShellContent(): ReactElement {
           <Outlet />
         </div>
         {showFocusBar ? <ActiveFocusBar /> : null}
+        <PlannerAgentLauncher />
+        <PlannerAgentPopup />
         <nav className="app-tabs" aria-label="Main navigation">
           <NavLink
             to="/dashboard"
@@ -123,8 +128,10 @@ function AppShellContent(): ReactElement {
 
 export function AppShell(): ReactElement {
   return (
-    <FocusSessionProvider>
-      <AppShellContent />
-    </FocusSessionProvider>
+    <PlannerAgentProvider>
+      <FocusSessionProvider>
+        <AppShellContent />
+      </FocusSessionProvider>
+    </PlannerAgentProvider>
   );
 }

@@ -34,6 +34,9 @@ function buildTasksQuery(params: ListTasksParams): string {
   if (params.order !== undefined) {
     query.set('order', params.order);
   }
+  if (params.parentTaskId !== undefined) {
+    query.set('parentTaskId', params.parentTaskId);
+  }
   const qs = query.toString();
   return qs.length > 0 ? `?${qs}` : '';
 }

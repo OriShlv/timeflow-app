@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { prisma } from '../../db/prisma';
 import { signAccessToken } from '../../core/jwt';
-import { Prisma } from '@prisma/client';
 import { HttpError } from '../../app/errors/http-error';
 
 export async function register(email: string, password: string, name?: string) {
@@ -16,7 +16,7 @@ export async function register(email: string, password: string, name?: string) {
     const accessToken = signAccessToken({ sub: user.id, email: user.email });
     return { user, accessToken };
   } catch (err: unknown) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+    if (err instanceof PrismaClientKnownRequestError && err.code === 'P2002') {
       throw new HttpError(409, 'EmailAlreadyExists');
     }
 

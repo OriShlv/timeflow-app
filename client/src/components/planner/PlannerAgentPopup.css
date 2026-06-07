@@ -1,0 +1,57 @@
+.tf-planner-popup__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  background: color-mix(in srgb, var(--tf-text) 18%, transparent);
+}
+
+.tf-planner-popup {
+  position: fixed;
+  left: 1rem;
+  bottom: calc(
+    var(--app-tabs-height, 64px) + var(--app-focus-bar-height, 0px) + 0.75rem + 3rem + 0.75rem
+  );
+  z-index: 46;
+  display: flex;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(28rem, 55dvh);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius-md, 0.75rem);
+  background: var(--tf-card);
+  box-shadow: var(--tf-shadow-card);
+}
+
+.tf-planner-popup__new-reply {
+  border-radius: 999px;
+  background: var(--tf-primary-light);
+  color: var(--tf-primary);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.2rem 0.45rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.tf-planner-popup--response-flash {
+  animation: tf-planner-response-flash 1s ease-out;
+  border-color: var(--tf-primary);
+}
+
+@keyframes tf-planner-response-flash {
+  0% {
+    box-shadow:
+      0 0 0 0 color-mix(in srgb, var(--tf-primary) 60%, transparent),
+      var(--tf-shadow-card);
+  }
+  35% {
+    box-shadow:
+      0 0 0 8px color-mix(in srgb, var(--tf-primary) 30%, transparent),
+      var(--tf-shadow-card);
+  }
+  100% {
+    box-shadow: var(--tf-shadow-card);
+  }
+}

@@ -17,11 +17,19 @@ export async function publishEventById(eventId: string) {
   });
 
   if (!ev) {
-    throw new HttpError(500, 'TaskEventNotFound', `Task event not found for publish. eventId=${eventId}`);
+    throw new HttpError(
+      500,
+      'TaskEventNotFound',
+      `Task event not found for publish. eventId=${eventId}`,
+    );
   }
 
   if (!ev.taskId) {
-    throw new HttpError(500, 'TaskEventMissingTaskId', `Task event is missing taskId. eventId=${eventId}`);
+    throw new HttpError(
+      500,
+      'TaskEventMissingTaskId',
+      `Task event is missing taskId. eventId=${eventId}`,
+    );
   }
 
   const fields: Record<string, string> = {

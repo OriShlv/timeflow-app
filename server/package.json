@@ -24,24 +24,30 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/client": "^6.19.1",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "7",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "ioredis": "^5.9.0",
     "jsonwebtoken": "^9.0.3",
+    "ollama": "^0.6.3",
+    "pg": "^8.21.0",
     "pino": "^10.1.0",
     "pino-http": "^11.0.0",
-    "prisma": "^6.19.1",
+    "prisma": "7",
     "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
+    "@types/bun": "latest",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.3",
+    "@types/pg": "^8.20.0",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
@@ -51,8 +57,7 @@
     "prettier": "^3.4.0",
     "supertest": "^7.2.2",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18",
-    "@types/bun": "latest"
+    "vitest": "^4.0.18"
   },
   "private": true
 }

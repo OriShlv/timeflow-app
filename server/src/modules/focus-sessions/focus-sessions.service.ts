@@ -1,4 +1,4 @@
-import type { FocusSessionStatus, Prisma } from '@prisma/client';
+import type { FocusSessionStatus, Prisma } from '../../db/client';
 import { prisma } from '../../db/prisma';
 import { HttpError } from '../../app/errors/http-error';
 import { publishEventById } from '../../events/publisher';
@@ -235,7 +235,10 @@ export async function getDailyFocusSummary(userId: string, day: Date) {
   });
 
   const completed = sessions.filter((session) => session.status === 'COMPLETED');
-  const byTaskMap = new Map<string, { taskId: string | null; minutes: number; sessionsCount: number }>();
+  const byTaskMap = new Map<
+    string,
+    { taskId: string | null; minutes: number; sessionsCount: number }
+  >();
 
   for (const session of completed) {
     const key = session.taskId ?? 'null';
