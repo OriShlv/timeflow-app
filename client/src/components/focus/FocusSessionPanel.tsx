@@ -21,6 +21,12 @@ export function FocusSessionPanel(props: FocusSessionPanelProps): ReactElement {
     });
   };
 
+  const onCancel = (): void => {
+    focus.cancelFocus().catch((err: unknown) => {
+      props.onError(toUiErrorMessage(err));
+    });
+  };
+
   const onPauseToggle = (): void => {
     if (focus.isPaused) {
       focus.resumeFocus();
@@ -83,7 +89,7 @@ export function FocusSessionPanel(props: FocusSessionPanelProps): ReactElement {
       <p className="focus-session-panel__task">{taskLabel}</p>
       <p className="focus-session-panel__timer">{elapsed}</p>
       <p className="focus-session-panel__hint">
-        Pause to take a break without ending the session. Stop saves your focused time.
+        Pause to take a break without ending the session. Stop saves your focused time. Cancel discards the session.
       </p>
       <div className="focus-session-panel__actions">
         <Button
@@ -99,6 +105,21 @@ export function FocusSessionPanel(props: FocusSessionPanelProps): ReactElement {
         >
           {focus.isPaused ? 'Resume' : 'Pause'}
         </Button>
+        {focus.isPaused ? (
+          <Button
+            type="button"
+            fill="outline"
+            size="small"
+            expand={undefined}
+            color="danger"
+            disabled={focus.actionLoading}
+            className={undefined}
+            aria-label="Cancel focus session without saving time"
+            onClick={onCancel}
+          >
+            {focus.actionLoading ? 'Canceling…' : 'Cancel'}
+          </Button>
+        ) : null}
         <Button
           type="button"
           fill="solid"

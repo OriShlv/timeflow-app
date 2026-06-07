@@ -122,9 +122,25 @@
 }
 
 .app-header-focus__pause:disabled,
+.app-header-focus__cancel:disabled,
 .app-header-focus__stop:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.app-header-focus__cancel {
+  border: 1px solid color-mix(in srgb, var(--tf-danger) 35%, transparent);
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  background: var(--tf-card);
+  color: var(--tf-danger);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app-header-focus__cancel:hover:not(:disabled) {
+  background: var(--tf-danger-light);
 }
 
 .page-wrap > * {

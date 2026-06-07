@@ -1,5 +1,5 @@
 import { useCallback, type ReactElement } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { ActiveFocusBar } from '../focus/ActiveFocusBar';
 import { useAuth } from '../../lib/AuthContext';
@@ -22,6 +22,10 @@ function AppShellHeaderFocus(): ReactElement | null {
     focus.stopFocus().catch(() => undefined);
   };
 
+  const onCancel = (): void => {
+    focus.cancelFocus().catch(() => undefined);
+  };
+
   const onPauseToggle = (): void => {
     if (focus.isPaused) {
       focus.resumeFocus();
@@ -37,6 +41,11 @@ function AppShellHeaderFocus(): ReactElement | null {
       <button type="button" className="app-header-focus__pause" onClick={onPauseToggle} disabled={focus.actionLoading}>
         {focus.isPaused ? 'Resume' : 'Pause'}
       </button>
+      {focus.isPaused ? (
+        <button type="button" className="app-header-focus__cancel" onClick={onCancel} disabled={focus.actionLoading}>
+          Cancel
+        </button>
+      ) : null}
       <button type="button" className="app-header-focus__stop" onClick={onStop} disabled={focus.actionLoading}>
         {focus.actionLoading ? '…' : 'Stop'}
       </button>
@@ -47,8 +56,12 @@ function AppShellHeaderFocus(): ReactElement | null {
 function AppShellContent(): ReactElement {
   const auth = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const focus = useFocusSession();
   const hasActiveFocus = focus.activeSession !== null;
+  const hideFocusBar =
+    location.pathname === '/today' || location.pathname === '/tasks';
+  const showFocusBar = hasActiveFocus && !hideFocusBar;
 
   const onLogout = useCallback((): void => {
     auth.logout();
@@ -56,7 +69,7 @@ function AppShellContent(): ReactElement {
   }, [auth, navigate]);
 
   return (
-    <div className={`app-shell ${hasActiveFocus ? 'app-shell--focus-active' : ''}`}>
+    <div className={`app-shell ${showFocusBar ? 'app-shell--focus-active' : ''}`}>
       <div className="app-shell__main">
         <header className="app-header">
           <div className="app-toolbar">
@@ -70,7 +83,7 @@ function AppShellContent(): ReactElement {
         <div className="page-wrap">
           <Outlet />
         </div>
-        <ActiveFocusBar />
+        {showFocusBar ? <ActiveFocusBar /> : null}
         <nav className="app-tabs" aria-label="Main navigation">
           <NavLink
             to="/today"

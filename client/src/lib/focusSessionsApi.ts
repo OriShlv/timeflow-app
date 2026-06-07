@@ -82,11 +82,12 @@ export async function stopFocusSession(id: string, endedAt: string | undefined):
   return response.session;
 }
 
-export async function cancelFocusSession(id: string): Promise<FocusSession> {
+export async function cancelFocusSession(id: string, endedAt: string | undefined): Promise<FocusSession> {
+  const body = endedAt === undefined ? {} : { endedAt };
   const response = await apiRequest<{ ok: boolean; session: FocusSession }>({
     method: 'POST',
     path: `/focus-sessions/${id}/cancel`,
-    body: {},
+    body,
     includeAuth: true,
   });
   return response.session;

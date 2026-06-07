@@ -16,6 +16,7 @@ import {
   getRunningFocusSession,
   startFocusSession,
   stopFocusSession,
+  cancelFocusSession,
 } from './focusSessionsApi';
 import { getTasks } from './tasksApi';
 import type { FocusSession } from './types';
@@ -36,6 +37,7 @@ export type FocusSessionContextValue = {
   pauseFocus: () => void;
   resumeFocus: () => void;
   stopFocus: () => Promise<void>;
+  cancelFocus: () => Promise<void>;
   getElapsedMs: (nowMs: number) => number;
   isTaskInFocus: (taskId: string) => boolean;
 };
@@ -220,6 +222,29 @@ export function FocusSessionProvider(props: FocusSessionProviderProps): ReactEle
     }
   }, [pauseState, resolveSessionForAction, resetPauseState, syncRunningSession]);
 
+  const cancelFocus = useCallback(async (): Promise<void> => {
+    setActionLoading(true);
+    try {
+      const existing = await resolveSessionForAction();
+      if (existing === null) {
+        setActiveSession(null);
+        resetPauseState();
+        return;
+      }
+      const session = await cancelFocusSession(existing.id, undefined);
+      if (session.status === 'RUNNING') {
+        await syncRunningSession();
+        return;
+      }
+      setActiveSession(null);
+      resetPauseState();
+    } catch (error: unknown) {
+      throw new Error(toUiErrorMessage(error));
+    } finally {
+      setActionLoading(false);
+    }
+  }, [resolveSessionForAction, resetPauseState, syncRunningSession]);
+
   const isTaskInFocus = useCallback(
     (taskId: string): boolean => {
       return activeSession?.session.taskId === taskId;
@@ -239,6 +264,7 @@ export function FocusSessionProvider(props: FocusSessionProviderProps): ReactEle
       pauseFocus,
       resumeFocus,
       stopFocus,
+      cancelFocus,
       getElapsedMs,
       isTaskInFocus,
     }),
@@ -252,6 +278,7 @@ export function FocusSessionProvider(props: FocusSessionProviderProps): ReactEle
       pauseFocus,
       resumeFocus,
       stopFocus,
+      cancelFocus,
       getElapsedMs,
       isTaskInFocus,
     ],

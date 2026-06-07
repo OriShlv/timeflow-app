@@ -1,0 +1,60 @@
+.hint-tooltip {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.hint-tooltip__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  border: 1px solid var(--tf-border);
+  border-radius: 50%;
+  background: var(--tf-card);
+  color: var(--tf-text-muted);
+  font-family: inherit;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+}
+
+.hint-tooltip__trigger:hover,
+.hint-tooltip__trigger:focus-visible {
+  border-color: var(--tf-primary);
+  color: var(--tf-primary);
+  outline: none;
+}
+
+.hint-tooltip__content {
+  position: absolute;
+  z-index: 10;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 8px;
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius-sm);
+  background: var(--tf-card);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+  color: var(--tf-text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%);
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.hint-tooltip:hover .hint-tooltip__content,
+.hint-tooltip:focus-within .hint-tooltip__content {
+  opacity: 1;
+  visibility: visible;
+}

@@ -2,6 +2,7 @@ export { Button, type ButtonProps, type ButtonFill, type ButtonSize, type Button
 export { Card, type CardProps } from './Card';
 export { ConfirmDialog, type ConfirmDialogProps, type ConfirmDialogButton } from './ConfirmDialog';
 export { Fab, type FabProps } from './Fab';
+export { HintTooltip, type HintTooltipProps } from './HintTooltip';
 export { Icon, type IconProps, type IconName } from './Icon';
 export { Input, type InputProps } from './Input';
 export { Modal, type ModalProps } from './Modal';

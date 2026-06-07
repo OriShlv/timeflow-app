@@ -30,6 +30,13 @@ export function ActiveFocusBar(): ReactElement | null {
     });
   };
 
+  const onCancel = (): void => {
+    setActionError(null);
+    focus.cancelFocus().catch((err: unknown) => {
+      setActionError(toUiErrorMessage(err));
+    });
+  };
+
   const onPauseToggle = (): void => {
     setActionError(null);
     if (focus.isPaused) {
@@ -69,6 +76,21 @@ export function ActiveFocusBar(): ReactElement | null {
           >
             {focus.isPaused ? 'Resume' : 'Pause'}
           </Button>
+          {focus.isPaused ? (
+            <Button
+              type="button"
+              fill="clear"
+              size="small"
+              expand={undefined}
+              color="danger"
+              disabled={focus.actionLoading}
+              className="active-focus-bar__cancel"
+              aria-label="Cancel focus session without saving time"
+              onClick={onCancel}
+            >
+              {focus.actionLoading ? 'Canceling…' : 'Cancel'}
+            </Button>
+          ) : null}
           <Button
             type="button"
             fill="solid"

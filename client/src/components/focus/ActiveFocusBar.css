@@ -66,10 +66,34 @@
 }
 
 .active-focus-bar__pause {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.active-focus-bar .active-focus-bar__pause:hover:not(:disabled),
+.active-focus-bar .active-focus-bar__pause:focus-visible:not(:disabled) {
+  background: #fff;
+  color: var(--tf-primary);
 }
 
 .active-focus-bar__stop {
   background: #fff;
   color: var(--tf-primary);
+}
+
+.active-focus-bar .active-focus-bar__stop:hover:not(:disabled),
+.active-focus-bar .active-focus-bar__stop:focus-visible:not(:disabled),
+.active-focus-bar .active-focus-bar__stop:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--tf-primary);
+}
+
+.active-focus-bar__cancel {
+  color: #fecaca;
+}
+
+.active-focus-bar .active-focus-bar__cancel:hover:not(:disabled),
+.active-focus-bar .active-focus-bar__cancel:focus-visible:not(:disabled) {
+  background: rgba(254, 202, 202, 0.2);
+  color: #fff;
 }

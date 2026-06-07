@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Fab, Modal, Toast } from '../components/ui';
+import { Fab, HintTooltip, Modal, Toast } from '../components/ui';
 import { DailyStats } from '../features/dashboard/DailyStats';
 import { RecommendationsList } from '../features/dashboard/RecommendationsList';
 import { SegmentBadge } from '../features/dashboard/SegmentBadge';
@@ -238,7 +238,13 @@ export function DashboardPage(): ReactElement {
               <div className="trend-value">{focusSummary?.totalMinutes ?? 0}</div>
             </div>
             <div className="trend-card">
-              <div className="trend-label">Completed sessions today</div>
+              <div className="trend-label">
+                <span>Completed sessions today</span>
+                <HintTooltip
+                  label="Completed sessions today"
+                  text="Focus sessions you stopped and saved today. Canceled or still-running sessions are not counted."
+                />
+              </div>
               <div className="trend-value">{focusSummary?.completedSessionsCount ?? 0}</div>
             </div>
           </div>
