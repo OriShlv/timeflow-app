@@ -1,5 +1,4 @@
 import { useEffect, type ReactElement } from 'react';
-import './Toast.css';
 
 export type ToastProps = {
   isOpen: boolean;
@@ -9,6 +8,7 @@ export type ToastProps = {
 };
 
 export function Toast(props: ToastProps): ReactElement | null {
+
   useEffect(() => {
     if (!props.isOpen) {
       return;
@@ -26,7 +26,11 @@ export function Toast(props: ToastProps): ReactElement | null {
   }
 
   return (
-    <div className="tf-toast" role="status" aria-live="polite">
+    <div
+      className="pointer-events-none fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] left-1/2 z-[90] max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-tf-sm bg-text px-5 py-3 text-sm font-medium text-white shadow-tf-card"
+      role="status"
+      aria-live="polite"
+    >
       {props.message}
     </div>
   );

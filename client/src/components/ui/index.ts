@@ -1,3 +1,4 @@
+export { Badge, type BadgeProps, type BadgeVariant } from './Badge';
 export { Button, type ButtonProps, type ButtonFill, type ButtonSize, type ButtonColor } from './Button';
 export { Card, type CardProps } from './Card';
 export { ConfirmDialog, type ConfirmDialogProps, type ConfirmDialogButton } from './ConfirmDialog';

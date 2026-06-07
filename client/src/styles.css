@@ -1,12 +1,37 @@
-/* Timeflow – Task Management Dashboard (Dribbble-inspired) */
-html,
-body {
-  height: 100%;
-  margin: 0;
-  width: 100%;
-  overflow-x: clip;
+/* TimeFlow design system – Tailwind-first with legacy CSS var bridge */
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #4b50f7;
+  --color-primary-hover: #3d42e0;
+  --color-primary-light: rgba(75, 80, 247, 0.08);
+  --color-accent: #f34f0b;
+  --color-surface: #f5f6fa;
+  --color-surface-end: #eef0f6;
+  --color-card: #ffffff;
+  --color-text: #181e32;
+  --color-text-muted: #6b7280;
+  --color-input-bg: #f8f8f9;
+  --color-border: #e5e7eb;
+  --color-success: #10b981;
+  --color-success-light: rgba(16, 185, 129, 0.12);
+  --color-warning: #f59e0b;
+  --color-warning-light: rgba(245, 158, 11, 0.12);
+  --color-danger: #ef4444;
+  --color-danger-light: rgba(239, 68, 68, 0.12);
+  --color-sidebar-bg: #ffffff;
+  --color-sidebar-text: #374151;
+
+  --radius-tf: 12px;
+  --radius-tf-sm: 8px;
+
+  --shadow-tf: 0 1px 2px rgba(24, 30, 50, 0.04);
+  --shadow-tf-card: 0 4px 12px rgba(24, 30, 50, 0.06);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Legacy CSS variables – kept during phased migration; retire per-component */
 :root {
   --app-header-height: 56px;
   --tf-primary: #4b50f7;
@@ -38,10 +63,17 @@ body {
   --tf-danger-light: rgba(239, 68, 68, 0.12);
 }
 
+html,
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--tf-bg);
-  color: var(--tf-text);
+  height: 100%;
+  margin: 0;
+  width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  font-family: var(--font-sans);
+  @apply bg-surface text-text;
 }
 
 #root {

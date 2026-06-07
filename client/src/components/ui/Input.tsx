@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
-import './Input.css';
+
+import { cn } from '../../lib/cn';
 
 export type InputProps = {
   id: string | undefined;
@@ -17,10 +18,10 @@ export function Input(props: InputProps): ReactElement {
   const className = props.className !== undefined ? props.className : '';
 
   return (
-    <div className={`tf-input-wrap ${className}`.trim()}>
+    <div className={cn('rounded-tf-sm border border-border bg-input-bg', className)}>
       <input
         id={props.id}
-        className="tf-input"
+        className="block w-full box-border rounded-tf-sm border-none bg-transparent px-4 py-3 font-sans text-base leading-snug text-text placeholder:text-text-muted focus:outline-2 focus:outline-primary-light focus:-outline-offset-1 disabled:opacity-60 disabled:cursor-not-allowed"
         type={props.type}
         value={props.value}
         placeholder={props.placeholder}

@@ -1,5 +1,4 @@
 import { useEffect, type ReactElement, type ReactNode } from 'react';
-import './Modal.css';
 
 export type ModalProps = {
   isOpen: boolean;
@@ -8,6 +7,7 @@ export type ModalProps = {
 };
 
 export function Modal(props: ModalProps): ReactElement | null {
+
   useEffect(() => {
     if (!props.isOpen) {
       return;
@@ -35,14 +35,22 @@ export function Modal(props: ModalProps): ReactElement | null {
   }
 
   return (
-    <div className="tf-modal" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center"
+      role="dialog"
+      aria-modal="true"
+    >
       <button
         type="button"
-        className="tf-modal__backdrop"
+        className="absolute inset-0 cursor-pointer border-none bg-text/40 p-0"
         aria-label="Close modal"
         onClick={props.onClose}
       />
-      <div className="tf-modal__panel">{props.children}</div>
+      <div
+        className="relative z-[1] flex max-h-[92dvh] w-full max-w-lg flex-col overflow-y-auto rounded-t-tf bg-surface shadow-tf-card sm:max-h-[85dvh] sm:rounded-tf"
+      >
+        {props.children}
+      </div>
     </div>
   );
 }
