@@ -4,8 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui';
 import { FocusSessionPanel } from '../components/focus/FocusSessionPanel';
 import { toUiErrorMessage } from '../lib/apiFeedback';
+import { formatDateTime } from '../lib/dateFormat';
 import { useFocusSession } from '../lib/FocusSessionContext';
+import { useT } from '../lib/i18n/I18nContext';
 import { getTasks, updateTask } from '../lib/tasksApi';
+import { useUserPreferences } from '../lib/useUserPreferences';
 import type { Task } from '../lib/types';
 import './TodayPage.css';
 
@@ -21,16 +24,15 @@ function isUrgentTask(task: Task): boolean {
   return dueDate.getTime() <= now.getTime() + 24 * 60 * 60 * 1000;
 }
 
-function formatDueDate(value: string): string {
-  return new Date(value).toLocaleString(undefined, {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  });
+function formatDueDate(value: string, timezone: string, language: 'en' | 'he'): string {
+  return formatDateTime(value, timezone, language, { dateStyle: 'short', timeStyle: 'short' });
 }
 
 export function TodayPage(): ReactElement {
   const navigate = useNavigate();
   const focus = useFocusSession();
+  const t = useT();
+  const { timezone, language } = useUserPreferences();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -141,8 +143,8 @@ export function TodayPage(): ReactElement {
     <div className="today-page">
       <div className="today-page__inner">
         <header className="today-page__header">
-          <h2 className="today-page__title">Today</h2>
-          <p className="today-page__subtitle">Urgent tasks and quick execution</p>
+          <h2 className="today-page__title">{t('today.title')}</h2>
+          <p className="today-page__subtitle">{t('today.subtitle')}</p>
         </header>
         <FocusSessionPanel
           onError={(message) => {
@@ -151,7 +153,7 @@ export function TodayPage(): ReactElement {
         />
         <section className="today-page__section">
           <div className="today-page__section-header">
-            <h3>Urgent tasks</h3>
+            <h3>{t('today.urgentTasks')}</h3>
             <Button
               type="button"
               fill="outline"
@@ -163,11 +165,11 @@ export function TodayPage(): ReactElement {
               aria-label="Open all tasks"
               onClick={() => navigate('/tasks')}
             >
-              Open tasks
+              {t('today.openTasks')}
             </Button>
           </div>
           {loading ? (
-            <div className="today-page__state">Loading today plan...</div>
+            <div className="today-page__state">{t('today.loading')}</div>
           ) : null}
           {error !== null ? (
             <div className="today-page__state today-page__state--error">
@@ -183,12 +185,12 @@ export function TodayPage(): ReactElement {
                 aria-label="Retry loading today"
                 onClick={loadToday}
               >
-                Retry
+                {t('today.retry')}
               </Button>
             </div>
           ) : null}
           {!loading && error === null && tasks.length === 0 ? (
-            <div className="today-page__state">No urgent tasks right now.</div>
+            <div className="today-page__state">{t('today.empty')}</div>
           ) : null}
           {!loading && error === null && tasks.length > 0 ? (
             <div className="today-page__list">
@@ -199,7 +201,9 @@ export function TodayPage(): ReactElement {
                 >
                   <div className="today-task-card__content">
                     <h4>{task.title}</h4>
-                    {task.dueAt !== null ? <p>Due {formatDueDate(task.dueAt)}</p> : null}
+                    {task.dueAt !== null ? (
+                      <p>{t('today.due', { date: formatDueDate(task.dueAt, timezone, language) })}</p>
+                    ) : null}
                   </div>
                   <div className="today-task-card__actions">
                     <Button
@@ -213,7 +217,7 @@ export function TodayPage(): ReactElement {
                       aria-label={undefined}
                       onClick={() => onMarkDone(task)}
                     >
-                      Mark done
+                      {t('today.markDone')}
                     </Button>
                     <Button
                       type="button"
@@ -226,7 +230,7 @@ export function TodayPage(): ReactElement {
                       aria-label={undefined}
                       onClick={() => onSnooze(task)}
                     >
-                      Snooze
+                      {t('today.snooze')}
                     </Button>
                     <Button
                       type="button"
@@ -239,7 +243,7 @@ export function TodayPage(): ReactElement {
                       aria-label={undefined}
                       onClick={() => onFocusTaskAction(task)}
                     >
-                      {focus.isTaskInFocus(task.id) ? 'Stop focus' : 'Start focus'}
+                      {focus.isTaskInFocus(task.id) ? t('today.stopFocus') : t('today.startFocus')}
                     </Button>
                   </div>
                 </article>

@@ -1,5 +1,7 @@
 import { useMemo, type ReactElement } from 'react';
 
+import { formatDate } from '../../lib/dateFormat';
+import { useUserPreferences } from '../../lib/useUserPreferences';
 import type { Task } from '../../lib/types';
 import './TaskCalendar.css';
 
@@ -53,8 +55,8 @@ function groupTasksByDueDate(tasks: Task[]): Map<string, Task[]> {
   return grouped;
 }
 
-function monthLabel(year: number, month: number): string {
-  return new Date(year, month, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+function monthLabel(year: number, month: number, timezone: string, language: 'en' | 'he'): string {
+  return formatDate(new Date(year, month, 1), timezone, language, { month: 'long', year: 'numeric' });
 }
 
 function shiftMonth(year: number, month: number, delta: number): { year: number; month: number } {
@@ -71,6 +73,7 @@ function isOverdueTask(task: Task, today: Date): boolean {
 }
 
 export function TaskCalendar(props: TaskCalendarProps): ReactElement {
+  const { timezone, language } = useUserPreferences();
   const today = useMemo(() => new Date(), []);
   const tasksByDate = useMemo(() => groupTasksByDueDate(props.tasks), [props.tasks]);
   const calendarDays = useMemo(
@@ -91,7 +94,7 @@ export function TaskCalendar(props: TaskCalendarProps): ReactElement {
   return (
     <section className="task-calendar" aria-label="Task calendar">
       <div className="task-calendar__header">
-        <h2 className="task-calendar__title">{monthLabel(props.viewYear, props.viewMonth)}</h2>
+        <h2 className="task-calendar__title">{monthLabel(props.viewYear, props.viewMonth, timezone, language)}</h2>
         <div className="task-calendar__nav">
           <button type="button" className="task-calendar__nav-btn" onClick={onPrevMonth} aria-label="Previous month">
             ‹

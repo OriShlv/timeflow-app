@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button, Input } from '../../components/ui';
 import { toUiErrorMessage } from '../../lib/apiFeedback';
 import { useAuth } from '../../lib/AuthContext';
+import { useT } from '../../lib/i18n/I18nContext';
 import './AuthPage.css';
 
 function isValidEmail(value: string): boolean {
@@ -12,6 +13,7 @@ function isValidEmail(value: string): boolean {
 
 export function RegisterPage(): ReactElement {
   const auth = useAuth();
+  const t = useT();
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>('');
   const [name, setName] = useState<string>('');
@@ -58,17 +60,17 @@ export function RegisterPage(): ReactElement {
       <div className="auth-form-container">
         <div className="auth-card">
           <form className="auth-form register-form" onSubmit={onSubmit}>
-            <h1>Create account</h1>
-            <p className="greeting">Get started with Timeflow</p>
+            <h1>{t('auth.register.title')}</h1>
+            <p className="greeting">{t('auth.register.greeting')}</p>
             {errorMessage !== null ? <p className="error">{errorMessage}</p> : null}
             <div className="form-fields">
               <div className="form-field">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">{t('auth.email')}</label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
-                  placeholder="you@example.com"
+                  placeholder={t('auth.emailPlaceholder')}
                   disabled={loading}
                   autoComplete="email"
                   className={undefined}
@@ -77,15 +79,15 @@ export function RegisterPage(): ReactElement {
                 />
               </div>
               {emailTouched && emailInvalid ? (
-                <p className="field-error">Valid email is required</p>
+                <p className="field-error">{t('auth.emailInvalid')}</p>
               ) : null}
               <div className="form-field">
-                <label htmlFor="name">Name (optional)</label>
+                <label htmlFor="name">{t('auth.name')}</label>
                 <Input
                   id="name"
                   type="text"
                   value={name}
-                  placeholder="Your name"
+                  placeholder={t('auth.namePlaceholder')}
                   disabled={loading}
                   autoComplete="name"
                   className={undefined}
@@ -94,12 +96,12 @@ export function RegisterPage(): ReactElement {
                 />
               </div>
               <div className="form-field">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">{t('auth.password')}</label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
-                  placeholder="Min 8 characters"
+                  placeholder={t('auth.passwordPlaceholder')}
                   disabled={loading}
                   autoComplete="new-password"
                   className={undefined}
@@ -108,7 +110,7 @@ export function RegisterPage(): ReactElement {
                 />
               </div>
               {passwordTouched && passwordInvalid ? (
-                <p className="field-error">Password must be at least 8 characters</p>
+                <p className="field-error">{t('auth.passwordInvalid')}</p>
               ) : null}
             </div>
             <Button
@@ -122,10 +124,11 @@ export function RegisterPage(): ReactElement {
               onClick={undefined}
               aria-label={undefined}
             >
-              {loading ? 'Registering…' : 'Register'}
+              {loading ? t('auth.register.submitting') : t('auth.register.submit')}
             </Button>
             <p className="auth-link">
-              Already have an account? <Link to="/login">Log in</Link>
+              {t('auth.register.hasAccount')}{' '}
+              <Link to="/login">{t('auth.register.loginLink')}</Link>
             </p>
           </form>
         </div>

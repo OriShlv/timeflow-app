@@ -8,6 +8,7 @@ import { SegmentBadge } from '../features/dashboard/SegmentBadge';
 import { SummaryCards } from '../features/dashboard/SummaryCards';
 import { TaskForm } from '../features/tasks/TaskForm';
 import { toUiErrorMessage } from '../lib/apiFeedback';
+import { useT } from '../lib/i18n/I18nContext';
 import { getDailyFeatures } from '../lib/featuresApi';
 import { getDailyFocusSummary } from '../lib/focusSessionsApi';
 import { getInsights } from '../lib/insightsApi';
@@ -39,22 +40,23 @@ function averageOverdue(rows: DailyFeatureRow[]): number {
   return total / rows.length;
 }
 
-function freshnessLabel(updatedAt: string | undefined): string {
+function freshnessLabel(updatedAt: string | undefined, t: (key: string) => string): string {
   if (updatedAt === undefined) {
-    return 'Processing';
+    return t('insights.freshness.processing');
   }
   const ageMs = Date.now() - new Date(updatedAt).getTime();
   if (ageMs <= 24 * 3600000) {
-    return 'Up to date';
+    return t('insights.freshness.upToDate');
   }
   if (ageMs <= 48 * 3600000) {
-    return 'Processing';
+    return t('insights.freshness.processing');
   }
-  return 'Delayed';
+  return t('insights.freshness.delayed');
 }
 
 export function DashboardPage(): ReactElement {
   const navigate = useNavigate();
+  const t = useT();
   const [insights, setInsights] = useState<Insights | null>(null);
   const [focusSummary, setFocusSummary] = useState<DailyFocusSummary | null>(null);
   const [trendRows, setTrendRows] = useState<DailyFeatureRow[]>([]);
@@ -119,8 +121,8 @@ export function DashboardPage(): ReactElement {
   const onTaskSaved = useCallback((): void => {
     setTaskFormOpen(false);
     load();
-    setToastMessage('Task created');
-  }, [load]);
+    setToastMessage(t('home.toast.created'));
+  }, [load, t]);
 
   const onRecommendationAction = useCallback(
     (recommendation: InsightsRecommendation): void => {
@@ -137,7 +139,7 @@ export function DashboardPage(): ReactElement {
   const hasAnyTask = (insights?.taskSummary.total ?? 0) > 0;
   const hasCompletedFocusSession = (focusSummary?.completedSessionsCount ?? 0) > 0;
   const hasInsightData = insights?.daily !== null && insights?.daily !== undefined;
-  const freshness = freshnessLabel(insights?.daily?.updatedAt);
+  const freshness = freshnessLabel(insights?.daily?.updatedAt, t);
 
   const onboardingMessage = !hasAnyTask
     ? 'Create your first task to start your workflow.'
@@ -154,7 +156,7 @@ export function DashboardPage(): ReactElement {
         <header className="dashboard-header">
           <div className="dashboard-header__top">
             <div>
-              <h1 className="dashboard-title">Insights</h1>
+              <h1 className="dashboard-title">{t('insights.title')}</h1>
               <p className="dashboard-subtitle">Actionable analytics and recommendations</p>
             </div>
             <button
@@ -169,12 +171,12 @@ export function DashboardPage(): ReactElement {
           </div>
           <p className="dashboard-subtitle">Insights freshness: {freshness}</p>
         </header>
-        {loading ? <section className="onboarding-banner">Loading insights...</section> : null}
+        {loading ? <section className="onboarding-banner">{t('insights.loading')}</section> : null}
         {error !== null ? (
           <section className="onboarding-banner">
             {error}
             <button type="button" className="dashboard-refresh" onClick={load}>
-              Retry
+              {t('insights.retry')}
             </button>
           </section>
         ) : null}
@@ -213,14 +215,14 @@ export function DashboardPage(): ReactElement {
                 className={`trend-range-btn ${trendRange === 7 ? 'trend-range-btn--active' : ''}`}
                 onClick={() => setTrendRange(7)}
               >
-                7D
+                {t('insights.trend7')}
               </button>
               <button
                 type="button"
                 className={`trend-range-btn ${trendRange === 30 ? 'trend-range-btn--active' : ''}`}
                 onClick={() => setTrendRange(30)}
               >
-                30D
+                {t('insights.trend30')}
               </button>
             </div>
           </div>
@@ -250,7 +252,7 @@ export function DashboardPage(): ReactElement {
           </div>
         </section>
       </div>
-      <Fab iconName="add" ariaLabel="Add task" onClick={openCreateTask} />
+      <Fab iconName="add" ariaLabel={t('insights.createTask')} onClick={openCreateTask} />
       <Modal isOpen={taskFormOpen} onClose={closeTaskForm}>
         <TaskForm task={null} onClose={closeTaskForm} onSaved={onTaskSaved} />
       </Modal>

@@ -4,11 +4,13 @@ import { getApiUrl } from './env';
 export class ApiError extends Error {
   readonly status: number;
   readonly retryable: boolean;
+  readonly details: unknown | undefined;
 
-  constructor(status: number, message: string, retryable: boolean) {
+  constructor(status: number, message: string, retryable: boolean, details?: unknown) {
     super(message);
     this.status = status;
     this.retryable = retryable;
+    this.details = details;
   }
 }
 
@@ -180,11 +182,12 @@ export async function apiRequest<T>(options: ApiRequestOptions): Promise<T> {
   }
 
   if (!response.ok) {
-    const body = await parseJsonBody<{ error?: string }>(response);
+    const body = await parseJsonBody<{ error?: string; details?: unknown }>(response);
     throw new ApiError(
       response.status,
       parseErrorMessage(body, 'Request failed'),
       shouldRetryStatus(response.status),
+      body?.details,
     );
   }
 

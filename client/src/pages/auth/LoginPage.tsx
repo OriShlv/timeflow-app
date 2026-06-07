@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button, Input } from '../../components/ui';
 import { toUiErrorMessage } from '../../lib/apiFeedback';
 import { useAuth } from '../../lib/AuthContext';
+import { useT } from '../../lib/i18n/I18nContext';
 import './AuthPage.css';
 
 function isValidEmail(value: string): boolean {
@@ -12,6 +13,7 @@ function isValidEmail(value: string): boolean {
 
 export function LoginPage(): ReactElement {
   const auth = useAuth();
+  const t = useT();
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -54,17 +56,17 @@ export function LoginPage(): ReactElement {
       <div className="auth-form-container">
         <div className="auth-card">
           <form className="auth-form login-form" onSubmit={onSubmit}>
-            <h1>Log in</h1>
-            <p className="greeting">Nice to see you again</p>
+            <h1>{t('auth.login.title')}</h1>
+            <p className="greeting">{t('auth.login.greeting')}</p>
             {errorMessage !== null ? <p className="error">{errorMessage}</p> : null}
             <div className="form-fields">
               <div className="form-field">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">{t('auth.email')}</label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
-                  placeholder="you@example.com"
+                  placeholder={t('auth.emailPlaceholder')}
                   disabled={loading}
                   autoComplete="email"
                   className={undefined}
@@ -73,15 +75,15 @@ export function LoginPage(): ReactElement {
                 />
               </div>
               {emailTouched && emailInvalid ? (
-                <p className="field-error">Valid email is required</p>
+                <p className="field-error">{t('auth.emailInvalid')}</p>
               ) : null}
               <div className="form-field">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">{t('auth.password')}</label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
-                  placeholder="Min 8 characters"
+                  placeholder={t('auth.passwordPlaceholder')}
                   disabled={loading}
                   autoComplete="current-password"
                   className={undefined}
@@ -90,7 +92,7 @@ export function LoginPage(): ReactElement {
                 />
               </div>
               {passwordTouched && passwordInvalid ? (
-                <p className="field-error">Password must be at least 8 characters</p>
+                <p className="field-error">{t('auth.passwordInvalid')}</p>
               ) : null}
             </div>
             <Button
@@ -104,10 +106,11 @@ export function LoginPage(): ReactElement {
               onClick={undefined}
               aria-label={undefined}
             >
-              {loading ? 'Logging in…' : 'Log in'}
+              {loading ? t('auth.login.submitting') : t('auth.login.submit')}
             </Button>
             <p className="auth-link">
-              Don&apos;t have an account? <Link to="/register">Register</Link>
+              {t('auth.login.noAccount')}{' '}
+              <Link to="/register">{t('auth.login.registerLink')}</Link>
             </p>
           </form>
         </div>

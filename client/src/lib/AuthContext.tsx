@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import { setUnauthorizedHandler } from './apiClient';
 import * as authLib from './auth';
 import type { AuthUser } from './types';
+import type { UpdateUserSettingsBody } from './usersApi';
+import { updateUserSettings } from './usersApi';
 
 export interface AuthContextValue {
   user: AuthUser | null;
@@ -20,6 +22,8 @@ export interface AuthContextValue {
   login: (email: string, password: string) => Promise<AuthUser>;
   register: (email: string, password: string, name: string | undefined) => Promise<AuthUser>;
   logout: () => void;
+  refreshUser: () => Promise<AuthUser>;
+  updateSettings: (body: UpdateUserSettingsBody) => Promise<AuthUser>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -70,6 +74,19 @@ export function AuthProvider(props: AuthProviderProps): ReactElement {
     setUser(null);
   }, []);
 
+  const refreshUser = useCallback(async (): Promise<AuthUser> => {
+    const refreshed = await authLib.fetchCurrentUser();
+    setUser(refreshed);
+    return refreshed;
+  }, []);
+
+  const updateSettings = useCallback(async (body: UpdateUserSettingsBody): Promise<AuthUser> => {
+    const updated = await updateUserSettings(body);
+    authLib.updateStoredUser(updated);
+    setUser(updated);
+    return updated;
+  }, []);
+
   const isLoggedIn = useCallback((): boolean => {
     return user !== null;
   }, [user]);
@@ -81,13 +98,22 @@ export function AuthProvider(props: AuthProviderProps): ReactElement {
       login,
       register,
       logout,
+      refreshUser,
+      updateSettings,
     }),
-    [user, isLoggedIn, login, register, logout],
+    [user, isLoggedIn, login, register, logout, refreshUser, updateSettings],
   );
 
   useEffect(() => {
     syncUser();
   }, [syncUser]);
+
+  useEffect(() => {
+    if (!authLib.isLoggedIn()) {
+      return;
+    }
+    authLib.fetchCurrentUser().then(setUser).catch(() => undefined);
+  }, []);
 
   return <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>;
 }

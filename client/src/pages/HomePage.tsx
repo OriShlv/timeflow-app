@@ -9,33 +9,38 @@ import { TaskCalendar, tasksForDate } from '../features/home/TaskCalendar';
 import { TaskForm } from '../features/tasks/TaskForm';
 import { useAuth } from '../lib/AuthContext';
 import { toUiErrorMessage } from '../lib/apiFeedback';
+import { formatDate, formatTime, hourInTimezone } from '../lib/dateFormat';
+import { useT } from '../lib/i18n/I18nContext';
 import { getDailyFocusSummary } from '../lib/focusSessionsApi';
 import { getInsights } from '../lib/insightsApi';
 import { getTasks } from '../lib/tasksApi';
 import { subscribeTasksRefresh } from '../lib/tasksRefresh';
 import type { DailyFocusSummary, InsightsRecommendation, Task, TaskSummary } from '../lib/types';
+import { useUserPreferences } from '../lib/useUserPreferences';
 import './HomePage.css';
 
-function greetingForHour(hour: number): string {
+function greetingForHour(hour: number, t: (key: string) => string): string {
   if (hour < 12) {
-    return 'Good morning';
+    return t('home.goodMorning');
   }
   if (hour < 17) {
-    return 'Good afternoon';
+    return t('home.goodAfternoon');
   }
-  return 'Good evening';
+  return t('home.goodEvening');
 }
 
-function formatSelectedDate(date: Date): string {
-  return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+function formatSelectedDate(date: Date, timezone: string, language: 'en' | 'he'): string {
+  return formatDate(date, timezone, language, { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
-function formatDueTime(value: string): string {
-  return new Date(value).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+function formatDueTime(value: string, timezone: string, language: 'en' | 'he'): string {
+  return formatTime(value, timezone, language, { hour: 'numeric', minute: '2-digit' });
 }
 
 export function HomePage(): ReactElement {
   const auth = useAuth();
+  const t = useT();
+  const { timezone, language } = useUserPreferences();
   const navigate = useNavigate();
   const now = useMemo(() => new Date(), []);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -107,8 +112,8 @@ export function HomePage(): ReactElement {
   const onTaskSaved = useCallback((): void => {
     setTaskFormOpen(false);
     load();
-    setToastMessage('Task created');
-  }, [load]);
+    setToastMessage(t('home.toast.created'));
+  }, [load, t]);
 
   const selectedTasks = useMemo(() => tasksForDate(tasks, selectedDate), [tasks, selectedDate]);
   const displayName = auth.user?.name ?? auth.user?.email?.split('@')[0] ?? 'there';
@@ -119,11 +124,11 @@ export function HomePage(): ReactElement {
         <header className="home-page__header">
           <div>
             <p className="home-page__greeting">
-              {greetingForHour(now.getHours())}, {displayName}
+              {greetingForHour(hourInTimezone(timezone), t)}, {displayName}
             </p>
             <h1 className="home-page__title">Dashboard</h1>
             <p className="home-page__subtitle">
-              {now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+              {formatSelectedDate(now, timezone, language)}
             </p>
           </div>
         </header>
@@ -177,7 +182,7 @@ export function HomePage(): ReactElement {
                 />
                 <section className="home-day-panel" aria-label="Tasks for selected day">
                   <div className="home-day-panel__header">
-                    <h2 className="home-day-panel__title">{formatSelectedDate(selectedDate)}</h2>
+                    <h2 className="home-day-panel__title">{formatSelectedDate(selectedDate, timezone, language)}</h2>
                     <Button
                       type="button"
                       fill="outline"
@@ -193,14 +198,14 @@ export function HomePage(): ReactElement {
                     </Button>
                   </div>
                   {selectedTasks.length === 0 ? (
-                    <p className="home-day-panel__empty">No tasks due on this day.</p>
+                    <p className="home-day-panel__empty">{t('home.noTasksDue')}</p>
                   ) : (
                     <ul className="home-day-panel__list">
                       {selectedTasks.map((task) => (
                         <li key={task.id} className="home-day-panel__item">
                           <span className="home-day-panel__task-title">{task.title}</span>
                           {task.dueAt !== null ? (
-                            <span className="home-day-panel__task-time">{formatDueTime(task.dueAt)}</span>
+                            <span className="home-day-panel__task-time">{formatDueTime(task.dueAt, timezone, language)}</span>
                           ) : null}
                         </li>
                       ))}
@@ -217,7 +222,7 @@ export function HomePage(): ReactElement {
           </>
         ) : null}
       </div>
-      <Fab iconName="add" ariaLabel="Add task" onClick={() => setTaskFormOpen(true)} />
+      <Fab iconName="add" ariaLabel={t('home.createTask')} onClick={() => setTaskFormOpen(true)} />
       <Modal isOpen={taskFormOpen} onClose={() => setTaskFormOpen(false)}>
         <TaskForm task={null} onClose={() => setTaskFormOpen(false)} onSaved={onTaskSaved} />
       </Modal>

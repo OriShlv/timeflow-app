@@ -1,4 +1,5 @@
 import { apiRequest } from './apiClient';
+import { getMe as fetchMeFromApi } from './usersApi';
 import type { AuthResponse, AuthUser } from './types';
 
 const TOKEN_KEY = 'accessToken';
@@ -48,7 +49,15 @@ export function getCurrentUser(): AuthUser | null {
     return null;
   }
   try {
-    return JSON.parse(raw) as AuthUser;
+    const parsed = JSON.parse(raw) as Partial<AuthUser> & { id: string; email: string };
+    return {
+      id: parsed.id,
+      email: parsed.email,
+      name: parsed.name ?? null,
+      timezone: parsed.timezone ?? 'UTC',
+      language: parsed.language ?? 'en',
+      createdAt: parsed.createdAt ?? new Date(0).toISOString(),
+    };
   } catch {
     return null;
   }
@@ -66,6 +75,16 @@ export function clearAuth(): void {
 function setAuth(auth: AuthResponse): void {
   localStorage.setItem(TOKEN_KEY, auth.accessToken);
   localStorage.setItem(USER_KEY, JSON.stringify(auth.user));
+}
+
+export function updateStoredUser(user: AuthUser): void {
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+}
+
+export async function fetchCurrentUser(): Promise<AuthUser> {
+  const user = await fetchMeFromApi();
+  updateStoredUser(user);
+  return user;
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {

@@ -28,6 +28,7 @@ Monorepo layout: React client, Bun/Express API, and Python analytics workers ove
 - **Insights** — segment badge, recommendations with deep links, 7/30-day trends, freshness status
 - **Focus sessions** — start/stop/cancel per task, active timer in shell, daily focus summary
 - **Planner agent** — LLM-assisted planning via Ollama (optional; see [server env](#environment-variables))
+- **Profile settings** — editable display name and timezone (server-persisted; dates render in saved timezone)
 - **Event pipeline** — task and focus outcomes published to Redis Streams; Python workers derive analytics
 
 ## Repository layout
@@ -148,7 +149,7 @@ Copy each package's `.env.example` to `.env`.
 |-------|--------|---------|
 | Health | `/health`, `/dbcheck` | Liveness and DB connectivity |
 | Auth | `/auth` | Register, login |
-| Users | `/me` | Current user profile |
+| Users | `/me`, `/users/me`, `/users/me/settings` | Profile read + settings update |
 | Tasks | `/tasks` | CRUD, filter, sort, pagination |
 | Focus | `/focus-sessions` | Start/stop/cancel, daily summary |
 | Analytics | `/analytics`, `/insights` | Aggregates, trends, dashboard |
@@ -162,7 +163,7 @@ Copy each package's `.env.example` to `.env`.
 3. **Today** — urgent tasks and fast actions
 4. **Tasks** — full task workspace
 5. **Insights** — stats, segment, recommendations
-6. **Profile** — identity and timezone
+6. **Profile** — display name, timezone, logout (`GET /users/me`, `PATCH /users/me/settings`)
 
 ## Design goals
 

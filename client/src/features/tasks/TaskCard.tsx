@@ -2,7 +2,10 @@ import type { ReactElement } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 import { Button } from '../../components/ui';
+import { formatDateTime } from '../../lib/dateFormat';
+import { useT } from '../../lib/i18n/I18nContext';
 import type { Task, TaskStatus } from '../../lib/types';
+import { useUserPreferences } from '../../lib/useUserPreferences';
 import { cn } from '../../lib/cn';
 
 export type TaskCardProps = {
@@ -22,27 +25,25 @@ export type TaskCardProps = {
   focusActionLoading: boolean;
 };
 
-function statusLabel(status: TaskStatus): string {
+function statusLabel(status: TaskStatus, t: (key: string) => string): string {
   switch (status) {
     case 'DONE':
-      return 'Done';
+      return t('tasks.status.done');
     case 'CANCELED':
-      return 'Canceled';
+      return t('tasks.status.canceled');
     default:
-      return 'Pending';
+      return t('tasks.status.pending');
   }
 }
 
-function formatDue(dueAt: string): string {
-  const d = new Date(dueAt);
-  return d.toLocaleString(undefined, {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  });
+function formatDue(dueAt: string, timezone: string, language: 'en' | 'he'): string {
+  return formatDateTime(dueAt, timezone, language, { dateStyle: 'short', timeStyle: 'short' });
 }
 
 export function TaskCard(props: TaskCardProps): ReactElement {
   const { task } = props;
+  const t = useT();
+  const { timezone, language } = useUserPreferences();
   const showExpand = props.subtaskCount !== undefined && props.subtaskCount > 0 && props.onToggleExpand !== undefined;
 
   return (
@@ -80,10 +81,10 @@ export function TaskCard(props: TaskCardProps): ReactElement {
           <h3 className="task-title">{task.title}</h3>
         </div>
         {task.description !== null ? <p className="task-desc">{task.description}</p> : null}
-        {task.dueAt !== null ? <p className="task-due">{formatDue(task.dueAt)}</p> : null}
+        {task.dueAt !== null ? <p className="task-due">{formatDue(task.dueAt, timezone, language)}</p> : null}
         <div className="task-card-footer">
           <span className="status-pill" data-status={task.status}>
-            {statusLabel(task.status)}
+            {statusLabel(task.status, t)}
           </span>
           <div className="task-actions">
             <Button

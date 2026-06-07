@@ -63,7 +63,7 @@ Defined in `.env`; read via `src/lib/env.ts`.
 | `/today` | Today — urgent tasks, focus panel | Protected |
 | `/tasks` | Task list, search, CRUD | Protected |
 | `/insights` | Analytics dashboard | Protected |
-| `/profile` | User identity, timezone | Protected |
+| `/profile` | Profile — name, timezone settings, logout | Protected |
 
 Protected routes render inside `AppShell` (tabs + active focus bar).
 
@@ -81,15 +81,21 @@ src/
 │   └── ui/             # Shared primitives (Button, Modal, Toast, …)
 └── lib/
     ├── apiClient.ts    # Fetch wrapper
-    ├── AuthContext.tsx
+    ├── AuthContext.tsx # JWT session, profile refresh, settings save
+    ├── i18n/           # Translation catalogs (English active; Hebrew deferred)
+    ├── dateFormat.ts   # Timezone-aware date/time formatting
+    ├── usersApi.ts     # GET /users/me, PATCH /users/me/settings
     ├── FocusSessionContext.tsx
     ├── PlannerAgentContext.tsx
     └── *Api.ts         # Per-domain API modules
 ```
 
+Profile settings are loaded from `GET /users/me` on app start. The language field is stored on the server but UI locale switching is disabled (`UI_LOCALE_SWITCHING_ENABLED` in `src/lib/i18n/config.ts`) until Hebrew + RTL layout are complete.
+
 ## Key contexts
 
-- **AuthContext** — JWT session, login/logout
+- **AuthContext** — JWT session, login/logout, `refreshUser`, `updateSettings`
+- **I18nProvider** — UI strings via translation keys (English only for now)
 - **FocusSessionContext** — active focus timer state
 - **PlannerAgentContext** — planner agent session lifecycle
 

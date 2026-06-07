@@ -76,7 +76,8 @@ Validated at startup in `src/config/env.ts`.
 | `/health` | health | Service liveness |
 | `/dbcheck` | dbcheck | Database connectivity |
 | `/auth` | auth | Register, login |
-| `/me` | users | Current user |
+| `/me`, `/users/me` | users | Current user profile |
+| `/users/me/settings` | users | PATCH — update name, timezone, language |
 | `/tasks` | tasks | Task CRUD, events to Redis |
 | `/focus-sessions` | focus-sessions | Focus timer lifecycle |
 | `/analytics` | analytics | Summary and daily stats |
@@ -117,6 +118,17 @@ bun run test
 ```
 
 Uses Vitest + Supertest against a dedicated `timeflow_test` database.
+
+### Users profile
+
+| Method | Path | Auth | Body / response |
+|--------|------|------|-----------------|
+| `GET` | `/me` or `/users/me` | Bearer JWT | `{ ok, user: { id, email, name, timezone, language, createdAt } }` |
+| `PATCH` | `/users/me/settings` | Bearer JWT | Partial `{ name?, timezone?, language? }` → updated `user` |
+
+Validation: `timezone` must be a valid IANA identifier; `language` must be `en` or `he`; `name` is trimmed and empty string becomes `null`.
+
+User defaults: `timezone=UTC`, `language=en`.
 
 ## Lint and format
 

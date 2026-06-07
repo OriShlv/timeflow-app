@@ -5,11 +5,13 @@ import { FocusSessionPanel } from '../components/focus/FocusSessionPanel';
 import { TaskForm } from '../features/tasks/TaskForm';
 import { TasksList, type TasksListHandle } from '../features/tasks/TasksList';
 import { toUiErrorMessage } from '../lib/apiFeedback';
+import { useT } from '../lib/i18n/I18nContext';
 import { deleteTask } from '../lib/tasksApi';
 import type { Task } from '../lib/types';
 import './TasksPage.css';
 
 export function TasksPage(): ReactElement {
+  const t = useT();
   const listRef = useRef<TasksListHandle>(null);
   const [taskFormOpen, setTaskFormOpen] = useState<boolean>(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -42,8 +44,8 @@ export function TasksPage(): ReactElement {
     setTaskFormOpen(false);
     setEditingTask(null);
     listRef.current?.reload();
-    setToastMessage(wasEdit ? 'Task updated' : 'Task created');
-  }, [editingTask]);
+    setToastMessage(wasEdit ? t('tasks.toast.updated') : t('tasks.toast.created'));
+  }, [editingTask, t]);
 
   const onDeleteDismiss = useCallback(
     (role: 'cancel' | 'destructive' | 'confirm' | 'backdrop'): void => {
@@ -82,7 +84,7 @@ export function TasksPage(): ReactElement {
         }}
       />
       <TasksList ref={listRef} onEditTask={onEditTask} onDeleteTask={onDeleteTask} />
-      <Fab iconName="add" ariaLabel="Create task" onClick={openCreateForm} />
+      <Fab iconName="add" ariaLabel={t('tasks.create')} onClick={openCreateForm} />
       <Modal isOpen={taskFormOpen} onClose={closeTaskForm}>
         <TaskForm task={editingTask} onClose={closeTaskForm} onSaved={onTaskSaved} />
       </Modal>

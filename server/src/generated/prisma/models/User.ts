@@ -29,6 +29,8 @@ export type UserMinAggregateOutputType = {
   email: string | null
   name: string | null
   passwordHash: string | null
+  timezone: string | null
+  language: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -38,6 +40,8 @@ export type UserMaxAggregateOutputType = {
   email: string | null
   name: string | null
   passwordHash: string | null
+  timezone: string | null
+  language: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -47,6 +51,8 @@ export type UserCountAggregateOutputType = {
   email: number
   name: number
   passwordHash: number
+  timezone: number
+  language: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -58,6 +64,8 @@ export type UserMinAggregateInputType = {
   email?: true
   name?: true
   passwordHash?: true
+  timezone?: true
+  language?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -67,6 +75,8 @@ export type UserMaxAggregateInputType = {
   email?: true
   name?: true
   passwordHash?: true
+  timezone?: true
+  language?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -76,6 +86,8 @@ export type UserCountAggregateInputType = {
   email?: true
   name?: true
   passwordHash?: true
+  timezone?: true
+  language?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -158,6 +170,8 @@ export type UserGroupByOutputType = {
   email: string
   name: string | null
   passwordHash: string
+  timezone: string
+  language: string
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -188,6 +202,8 @@ export type UserWhereInput = {
   email?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringNullableFilter<"User"> | string | null
   passwordHash?: Prisma.StringFilter<"User"> | string
+  timezone?: Prisma.StringFilter<"User"> | string
+  language?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   segment?: Prisma.XOR<Prisma.UserSegmentNullableScalarRelationFilter, Prisma.UserSegmentWhereInput> | null
@@ -204,6 +220,8 @@ export type UserOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  language?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   segment?: Prisma.UserSegmentOrderByWithRelationInput
@@ -223,6 +241,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   name?: Prisma.StringNullableFilter<"User"> | string | null
   passwordHash?: Prisma.StringFilter<"User"> | string
+  timezone?: Prisma.StringFilter<"User"> | string
+  language?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   segment?: Prisma.XOR<Prisma.UserSegmentNullableScalarRelationFilter, Prisma.UserSegmentWhereInput> | null
@@ -239,6 +259,8 @@ export type UserOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  language?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -254,6 +276,8 @@ export type UserScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   name?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   passwordHash?: Prisma.StringWithAggregatesFilter<"User"> | string
+  timezone?: Prisma.StringWithAggregatesFilter<"User"> | string
+  language?: Prisma.StringWithAggregatesFilter<"User"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -263,6 +287,8 @@ export type UserCreateInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentCreateNestedOneWithoutUserInput
@@ -279,6 +305,8 @@ export type UserUncheckedCreateInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentUncheckedCreateNestedOneWithoutUserInput
@@ -295,6 +323,8 @@ export type UserUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUpdateOneWithoutUserNestedInput
@@ -311,6 +341,8 @@ export type UserUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUncheckedUpdateOneWithoutUserNestedInput
@@ -327,6 +359,8 @@ export type UserCreateManyInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -336,6 +370,8 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -345,6 +381,8 @@ export type UserUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -354,6 +392,8 @@ export type UserCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  language?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -363,6 +403,8 @@ export type UserMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  language?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -372,6 +414,8 @@ export type UserMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  language?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -496,6 +540,8 @@ export type UserCreateWithoutTasksInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentCreateNestedOneWithoutUserInput
@@ -511,6 +557,8 @@ export type UserUncheckedCreateWithoutTasksInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentUncheckedCreateNestedOneWithoutUserInput
@@ -542,6 +590,8 @@ export type UserUpdateWithoutTasksInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUpdateOneWithoutUserNestedInput
@@ -557,6 +607,8 @@ export type UserUncheckedUpdateWithoutTasksInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUncheckedUpdateOneWithoutUserNestedInput
@@ -572,6 +624,8 @@ export type UserCreateWithoutFocusSessionsInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentCreateNestedOneWithoutUserInput
@@ -587,6 +641,8 @@ export type UserUncheckedCreateWithoutFocusSessionsInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentUncheckedCreateNestedOneWithoutUserInput
@@ -618,6 +674,8 @@ export type UserUpdateWithoutFocusSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUpdateOneWithoutUserNestedInput
@@ -633,6 +691,8 @@ export type UserUncheckedUpdateWithoutFocusSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUncheckedUpdateOneWithoutUserNestedInput
@@ -648,6 +708,8 @@ export type UserCreateWithoutEventsInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentCreateNestedOneWithoutUserInput
@@ -663,6 +725,8 @@ export type UserUncheckedCreateWithoutEventsInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentUncheckedCreateNestedOneWithoutUserInput
@@ -694,6 +758,8 @@ export type UserUpdateWithoutEventsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUpdateOneWithoutUserNestedInput
@@ -709,6 +775,8 @@ export type UserUncheckedUpdateWithoutEventsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUncheckedUpdateOneWithoutUserNestedInput
@@ -724,6 +792,8 @@ export type UserCreateWithoutDailyStatsInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentCreateNestedOneWithoutUserInput
@@ -739,6 +809,8 @@ export type UserUncheckedCreateWithoutDailyStatsInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentUncheckedCreateNestedOneWithoutUserInput
@@ -770,6 +842,8 @@ export type UserUpdateWithoutDailyStatsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUpdateOneWithoutUserNestedInput
@@ -785,6 +859,8 @@ export type UserUncheckedUpdateWithoutDailyStatsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUncheckedUpdateOneWithoutUserNestedInput
@@ -800,6 +876,8 @@ export type UserCreateWithoutRecommendationsInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentCreateNestedOneWithoutUserInput
@@ -815,6 +893,8 @@ export type UserUncheckedCreateWithoutRecommendationsInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentUncheckedCreateNestedOneWithoutUserInput
@@ -846,6 +926,8 @@ export type UserUpdateWithoutRecommendationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUpdateOneWithoutUserNestedInput
@@ -861,6 +943,8 @@ export type UserUncheckedUpdateWithoutRecommendationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUncheckedUpdateOneWithoutUserNestedInput
@@ -876,6 +960,8 @@ export type UserCreateWithoutDailyFeaturesInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentCreateNestedOneWithoutUserInput
@@ -891,6 +977,8 @@ export type UserUncheckedCreateWithoutDailyFeaturesInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   segment?: Prisma.UserSegmentUncheckedCreateNestedOneWithoutUserInput
@@ -922,6 +1010,8 @@ export type UserUpdateWithoutDailyFeaturesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUpdateOneWithoutUserNestedInput
@@ -937,6 +1027,8 @@ export type UserUncheckedUpdateWithoutDailyFeaturesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   segment?: Prisma.UserSegmentUncheckedUpdateOneWithoutUserNestedInput
@@ -952,6 +1044,8 @@ export type UserCreateWithoutSegmentInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   tasks?: Prisma.TaskCreateNestedManyWithoutUserInput
@@ -967,6 +1061,8 @@ export type UserUncheckedCreateWithoutSegmentInput = {
   email: string
   name?: string | null
   passwordHash: string
+  timezone?: string
+  language?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutUserInput
@@ -998,6 +1094,8 @@ export type UserUpdateWithoutSegmentInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.TaskUpdateManyWithoutUserNestedInput
@@ -1013,6 +1111,8 @@ export type UserUncheckedUpdateWithoutSegmentInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  language?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutUserNestedInput
@@ -1104,6 +1204,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   name?: boolean
   passwordHash?: boolean
+  timezone?: boolean
+  language?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   segment?: boolean | Prisma.User$segmentArgs<ExtArgs>
@@ -1121,6 +1223,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   name?: boolean
   passwordHash?: boolean
+  timezone?: boolean
+  language?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1130,6 +1234,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   name?: boolean
   passwordHash?: boolean
+  timezone?: boolean
+  language?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1139,11 +1245,13 @@ export type UserSelectScalar = {
   email?: boolean
   name?: boolean
   passwordHash?: boolean
+  timezone?: boolean
+  language?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "passwordHash" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "passwordHash" | "timezone" | "language" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   segment?: boolean | Prisma.User$segmentArgs<ExtArgs>
   tasks?: boolean | Prisma.User$tasksArgs<ExtArgs>
@@ -1173,6 +1281,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     email: string
     name: string | null
     passwordHash: string
+    timezone: string
+    language: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1609,6 +1719,8 @@ export interface UserFieldRefs {
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
+  readonly timezone: Prisma.FieldRef<"User", 'String'>
+  readonly language: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }

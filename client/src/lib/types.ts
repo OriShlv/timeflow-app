@@ -2,6 +2,9 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
+  timezone: string;
+  language: string;
+  createdAt: string;
 }
 
 export interface AuthResponse {

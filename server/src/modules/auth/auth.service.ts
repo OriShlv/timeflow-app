@@ -3,6 +3,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { prisma } from '../../db/prisma';
 import { signAccessToken } from '../../core/jwt';
 import { HttpError } from '../../app/errors/http-error';
+import { USER_PUBLIC_SELECT } from '../users/users.constants';
 
 export async function register(email: string, password: string, name?: string) {
   const passwordHash = await bcrypt.hash(password, 12);
@@ -10,7 +11,7 @@ export async function register(email: string, password: string, name?: string) {
   try {
     const user = await prisma.user.create({
       data: { email, name: name ?? null, passwordHash },
-      select: { id: true, email: true, name: true },
+      select: USER_PUBLIC_SELECT,
     });
 
     const accessToken = signAccessToken({ sub: user.id, email: user.email });
@@ -24,7 +25,10 @@ export async function register(email: string, password: string, name?: string) {
   }
 }
 export async function login(email: string, password: string) {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { ...USER_PUBLIC_SELECT, passwordHash: true },
+  });
   if (!user) {
     return null;
   }
@@ -34,9 +38,10 @@ export async function login(email: string, password: string) {
     return null;
   }
 
-  const accessToken = signAccessToken({ sub: user.id, email: user.email });
+  const { passwordHash: _passwordHash, ...publicUser } = user;
+  const accessToken = signAccessToken({ sub: publicUser.id, email: publicUser.email });
   return {
-    user: { id: user.id, email: user.email, name: user.name },
+    user: publicUser,
     accessToken,
   };
 }

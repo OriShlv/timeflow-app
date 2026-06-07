@@ -5,6 +5,7 @@ import { ActiveFocusBar } from '../focus/ActiveFocusBar';
 import { PlannerAgentLauncher } from '../planner/PlannerAgentLauncher';
 import { PlannerAgentPopup } from '../planner/PlannerAgentPopup';
 import { useAuth } from '../../lib/AuthContext';
+import { useT } from '../../lib/i18n/I18nContext';
 import { FocusSessionProvider, useFocusSession } from '../../lib/FocusSessionContext';
 import { PlannerAgentProvider } from '../../lib/PlannerAgentContext';
 import { formatElapsedMs, useFocusClock } from '../../lib/focusSessionTime';
@@ -12,6 +13,7 @@ import './AppShell.css';
 
 function AppShellHeaderFocus(): ReactElement | null {
   const focus = useFocusSession();
+  const t = useT();
   const startedAt = focus.activeSession?.session.startedAt ?? null;
   const nowMs = useFocusClock(startedAt);
 
@@ -39,18 +41,18 @@ function AppShellHeaderFocus(): ReactElement | null {
 
   return (
     <div className="app-header-focus" aria-label="Active focus session">
-      <span className="app-header-focus__label">{focus.isPaused ? 'Paused' : 'Focus'}</span>
+      <span className="app-header-focus__label">{focus.isPaused ? t('focus.paused') : t('focus.label')}</span>
       <span className="app-header-focus__timer">{elapsed}</span>
       <button type="button" className="app-header-focus__pause" onClick={onPauseToggle} disabled={focus.actionLoading}>
-        {focus.isPaused ? 'Resume' : 'Pause'}
+        {focus.isPaused ? t('focus.resume') : t('focus.pause')}
       </button>
       {focus.isPaused ? (
         <button type="button" className="app-header-focus__cancel" onClick={onCancel} disabled={focus.actionLoading}>
-          Cancel
+          {t('focus.cancel')}
         </button>
       ) : null}
       <button type="button" className="app-header-focus__stop" onClick={onStop} disabled={focus.actionLoading}>
-        {focus.actionLoading ? '…' : 'Stop'}
+        {focus.actionLoading ? '…' : t('focus.stop')}
       </button>
     </div>
   );
@@ -58,6 +60,7 @@ function AppShellHeaderFocus(): ReactElement | null {
 
 function AppShellContent(): ReactElement {
   const auth = useAuth();
+  const t = useT();
   const navigate = useNavigate();
   const location = useLocation();
   const focus = useFocusSession();
@@ -76,10 +79,10 @@ function AppShellContent(): ReactElement {
       <div className="app-shell__main">
         <header className="app-header">
           <div className="app-toolbar">
-            <h1 className="app-title">Timeflow</h1>
+            <h1 className="app-title">{t('app.title')}</h1>
             <AppShellHeaderFocus />
             <button type="button" className="logout-btn" onClick={onLogout}>
-              Logout
+              {t('nav.logout')}
             </button>
           </div>
         </header>
@@ -94,31 +97,31 @@ function AppShellContent(): ReactElement {
             to="/dashboard"
             className={({ isActive }) => `app-tab ${isActive ? 'app-tab--active' : ''}`}
           >
-            Home
+            {t('nav.home')}
           </NavLink>
           <NavLink
             to="/today"
             className={({ isActive }) => `app-tab ${isActive ? 'app-tab--active' : ''}`}
           >
-            Today
+            {t('nav.today')}
           </NavLink>
           <NavLink
             to="/tasks"
             className={({ isActive }) => `app-tab ${isActive ? 'app-tab--active' : ''}`}
           >
-            Tasks
+            {t('nav.tasks')}
           </NavLink>
           <NavLink
             to="/insights"
             className={({ isActive }) => `app-tab ${isActive ? 'app-tab--active' : ''}`}
           >
-            Insights
+            {t('nav.insights')}
           </NavLink>
           <NavLink
             to="/profile"
             className={({ isActive }) => `app-tab ${isActive ? 'app-tab--active' : ''}`}
           >
-            Profile
+            {t('nav.profile')}
           </NavLink>
         </nav>
       </div>
