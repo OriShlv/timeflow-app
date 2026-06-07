@@ -1,30 +1,32 @@
 ## TimeFlow
 
-TimeFlow is a personal time and task management platform with an **event‑driven backend** and **analytics workers**.
-It is designed as a production‑style backend system that demonstrates modern patterns: Redis Streams, background workers, operational tooling (health checks, DB checks, ops endpoints, DLQ and replay), and typed APIs with validation.
+TimeFlow is a full-stack daily planning app with a React client, an event-driven API, and Python analytics workers.
+The product currently ships a mobile-first UX loop: **capture tasks -> execute with focus sessions -> review insights -> adjust plan**.
 
 ### Key capabilities
-- **Event‑driven processing**: Tasks and usage events are written to Redis Streams and processed asynchronously.
-- **Analytics workers (Python)**: Daily analytics, user segmentation, and insights are computed out of band.
-- **Operational tooling**: Health and DB check endpoints, ops routes, and support for dead‑letter queues and replay.
-- **Security & auth**: JWT‑based authentication, password hashing, and request validation with Zod.
-- **Extensible domain model**: Users, tasks, features, segments, analytics, recommendations, and insights modules.
+- **Today command center**: Urgent tasks, quick actions (`Mark done`, `Snooze`, `Start focus`), and focus-session controls.
+- **Task execution workspace**: Search/filter/sort, CRUD, optimistic status updates, pagination, and empty-state guidance.
+- **Insights workspace**: Segment badge, recommendations with deep-link actions, 7/30-day trends, and freshness status.
+- **Focus session tracking**: Start/stop/cancel sessions per task, active timers in shell UI, and daily focus summary.
+- **Event-driven analytics**: Task and focus outcomes feed Redis Streams and Python workers for derived insights.
 
 ---
 
 ## Architecture
 
-- **`server/`** – Bun API (TypeScript, Express, Prisma)  
-  - Routes for auth, users, tasks, analytics, recommendations, features, segments, insights, and ops.
+- **`client/`** – React + Vite + TypeScript
+  - Auth flows (`/login`, `/register`) with guarded app routes.
+  - Main app shell with tabs: `Today`, `Tasks`, `Insights`, `Profile`.
+  - Shared UI primitives (`Button`, `Modal`, `Toast`, etc.) and focus-session context.
+- **`server/`** – Bun runtime API (TypeScript, Express, Prisma)
+  - Route groups: auth, users, tasks, focus sessions, analytics, features, segment, recommendations, insights, ops.
   - Centralized error handling and HTTP logging with `pino-http`.
-  - PostgreSQL via Prisma, Redis for streams and real‑time pipelines.
-- **`python-workers/`** – Python workers  
-  - Consume Redis Streams for real‑time and batch analytics.
-  - Produce aggregated metrics, user segments, and insights back to the system.
-- **`client/`** – Frontend UI (planned)  
-  - Intentionally decoupled; the API is usable by any client (web, mobile, CLI).
-- **`docker-compose.yml`** – Local infrastructure  
-  - Postgres and Redis for local development.
+  - PostgreSQL via Prisma and Redis Streams for event pipelines.
+- **`python-workers/`** – Python analytics workers
+  - Realtime consumer updates derived features/segments.
+  - Batch jobs compute daily stats, features, recommendations, and clustering outputs.
+- **`docker-compose.yml`** – Local infra
+  - PostgreSQL + Redis for development and integration tests.
 
 This layout is meant to mirror a realistic service: a typed HTTP API, background workers, and explicit operational surfaces.
 
@@ -65,7 +67,17 @@ bun run dev
 
 The API will be available on `http://localhost:<PORT>` (see `server/src/config/env.ts` for the exact port).
 
-### 3) Run the Python workers (optional but recommended)
+### 3) Run the client (React app)
+
+```bash
+cd client
+bun install
+bun run dev
+```
+
+Client app default: `http://localhost:5173`.
+
+### 4) Run the Python workers (optional but recommended)
 
 ```bash
 cd python-workers
@@ -92,7 +104,7 @@ Workers listen to Redis Streams and Postgres, compute analytics/insights, and wr
 
 ---
 
-## API surface (high‑level)
+## API surface (high-level)
 
 Some of the key route groups exposed by the server:
 
@@ -102,9 +114,14 @@ Some of the key route groups exposed by the server:
 - **Auth / users**
   - `POST /auth/login`, `POST /auth/register`
   - `GET /me` and related user routes
-- **Tasks & time tracking**
-  - `CRUD` operations for tasks and related entities
-  - Events published to Redis Streams for downstream processing
+- **Tasks**
+  - `GET/POST/PATCH/DELETE /tasks`
+  - Supports filtering, sorting, and pagination
+- **Focus sessions**
+  - `POST /focus-sessions/start`
+  - `POST /focus-sessions/:id/stop`
+  - `POST /focus-sessions/:id/cancel`
+  - `GET /focus-sessions` and `GET /focus-sessions/summary/daily`
 - **Analytics & insights**
   - `/analytics/*` – aggregate views over time usage
   - `/insights/*` – user‑level insights and recommendations
@@ -114,6 +131,14 @@ Some of the key route groups exposed by the server:
 Endpoints are implemented with TypeScript, Prisma, and Zod to enforce input/output types and reduce runtime errors.
 
 ---
+
+## UX flow (current)
+
+1. **Auth** -> user registers/logs in and lands on `/today`.
+2. **Today** -> urgent task shortlist + fast actions + focus panel.
+3. **Tasks** -> full task management with filters, sorting, and edit/delete.
+4. **Insights** -> recommendations, stats, trends, and focus outcomes.
+5. **Profile** -> basic identity and timezone information.
 
 ## Development workflow
 
@@ -134,7 +159,7 @@ Configuration is environment‑driven (`.env` files) and can be adapted to diffe
 
 ## Design goals
 
-- **Realistic backend patterns** – Event‑driven processing, dedicated ops endpoints, typed contracts, and clear separation between online traffic and offline analytics.
-- **Observability & diagnosability** – Structured logging, health checks, DB checks, and ops utilities to inspect and replay messages.
-- **Extensibility** – New domains (e.g., additional analytics or recommendation strategies) can be added as separate modules without changing the core server setup.
-- **Safety & correctness** – Runtime validation, explicit types, and cautious handling of credentials and secrets via environment variables.
+- **Fast execution loop** - reduce friction between task capture, focused execution, and reflection.
+- **Clear system boundaries** - transactional API paths stay responsive while analytics run asynchronously.
+- **Operational visibility** - health/db checks, structured logs, and ops routes for diagnostics and recovery.
+- **Incremental extensibility** - new UX surfaces and analytics modules can be added without breaking API compatibility.
