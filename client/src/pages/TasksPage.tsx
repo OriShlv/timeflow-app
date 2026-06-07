@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState, type ReactElement } from 'react';
 
 import { ConfirmDialog, Fab, Modal, Toast } from '../components/ui';
+import { FocusSessionPanel } from '../components/focus/FocusSessionPanel';
 import { TaskForm } from '../features/tasks/TaskForm';
 import { TasksList, type TasksListHandle } from '../features/tasks/TasksList';
 import { toUiErrorMessage } from '../lib/apiFeedback';
@@ -75,6 +76,11 @@ export function TasksPage(): ReactElement {
 
   return (
     <div className="tasks-page">
+      <FocusSessionPanel
+        onError={(message) => {
+          setToastMessage(message);
+        }}
+      />
       <TasksList ref={listRef} onEditTask={onEditTask} onDeleteTask={onDeleteTask} />
       <Fab iconName="add" ariaLabel="Create task" onClick={openCreateForm} />
       <Modal isOpen={taskFormOpen} onClose={closeTaskForm}>

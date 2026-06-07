@@ -1,6 +1,6 @@
 .tf-fab {
   position: fixed;
-  bottom: calc(var(--app-tabs-height, env(safe-area-inset-bottom)) + 0.75rem);
+  bottom: calc(var(--app-tabs-height, env(safe-area-inset-bottom)) + var(--app-focus-bar-height, 0px) + 0.75rem);
   right: 1rem;
   z-index: 40;
 }

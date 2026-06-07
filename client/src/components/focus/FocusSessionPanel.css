@@ -1,0 +1,79 @@
+.focus-session-panel {
+  background: var(--tf-card);
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius);
+  padding: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.focus-session-panel--active {
+  border-color: var(--tf-primary);
+  background: var(--tf-primary-light);
+}
+
+.focus-session-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 0.35rem;
+}
+
+.focus-session-panel__title {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--tf-text);
+}
+
+.focus-session-panel__badge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tf-primary);
+  background: var(--tf-card);
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+}
+
+.focus-session-panel__idle {
+  margin: 0;
+  color: var(--tf-text-muted);
+  font-size: 0.875rem;
+}
+
+.focus-session-panel__task {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tf-text);
+}
+
+.focus-session-panel--paused {
+  border-color: var(--tf-text-muted);
+  background: color-mix(in srgb, var(--tf-primary-light) 60%, var(--tf-card));
+}
+
+.focus-session-panel__timer {
+  margin: 0.35rem 0 0.5rem;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--tf-primary);
+}
+
+.focus-session-panel__hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--tf-text-muted);
+}
+
+.focus-session-panel__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.focus-session-panel__stop {
+  background: var(--tf-primary);
+  color: #fff;
+}

@@ -1,0 +1,75 @@
+.active-focus-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--app-tabs-height);
+  z-index: 36;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--tf-primary);
+  border-top: none;
+  box-shadow: 0 -4px 16px rgba(75, 80, 247, 0.25);
+}
+
+.active-focus-bar__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.active-focus-bar__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.active-focus-bar__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.active-focus-bar__task {
+  font-size: 0.9375rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.active-focus-bar__timer {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #fff;
+}
+
+.active-focus-bar__error {
+  font-size: 0.75rem;
+  color: #fecaca;
+}
+
+.active-focus-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.active-focus-bar--paused {
+  background: color-mix(in srgb, var(--tf-primary) 70%, #64748b);
+}
+
+.active-focus-bar__pause {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.active-focus-bar__stop {
+  background: #fff;
+  color: var(--tf-primary);
+}

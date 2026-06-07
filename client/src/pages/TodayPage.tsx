@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '../components/ui';
+import { FocusSessionPanel } from '../components/focus/FocusSessionPanel';
 import { toUiErrorMessage } from '../lib/apiFeedback';
-import { startFocusSession } from '../lib/focusSessionsApi';
+import { useFocusSession } from '../lib/FocusSessionContext';
 import { getTasks, updateTask } from '../lib/tasksApi';
 import type { Task } from '../lib/types';
 import './TodayPage.css';
@@ -29,6 +30,7 @@ function formatDueDate(value: string): string {
 
 export function TodayPage(): ReactElement {
   const navigate = useNavigate();
+  const focus = useFocusSession();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,17 +104,38 @@ export function TodayPage(): ReactElement {
 
   const onStartFocus = useCallback((task: Task): void => {
     setActionTaskId(task.id);
-    startFocusSession(task.id)
-      .then(() => {
-        navigate('/tasks');
-      })
+    focus
+      .startFocus(task.id, task.title)
       .catch((err: unknown) => {
         setError(toUiErrorMessage(err));
       })
       .finally(() => {
         setActionTaskId(null);
       });
-  }, [navigate]);
+  }, [focus]);
+
+  const onStopFocus = useCallback((): void => {
+    setActionTaskId('focus-stop');
+    focus
+      .stopFocus()
+      .catch((err: unknown) => {
+        setError(toUiErrorMessage(err));
+      })
+      .finally(() => {
+        setActionTaskId(null);
+      });
+  }, [focus]);
+
+  const onFocusTaskAction = useCallback(
+    (task: Task): void => {
+      if (focus.isTaskInFocus(task.id)) {
+        onStopFocus();
+        return;
+      }
+      onStartFocus(task);
+    },
+    [focus, onStartFocus, onStopFocus],
+  );
 
   return (
     <div className="today-page">
@@ -121,6 +144,11 @@ export function TodayPage(): ReactElement {
           <h2 className="today-page__title">Today</h2>
           <p className="today-page__subtitle">Urgent tasks and quick execution</p>
         </header>
+        <FocusSessionPanel
+          onError={(message) => {
+            setError(message);
+          }}
+        />
         <section className="today-page__section">
           <div className="today-page__section-header">
             <h3>Urgent tasks</h3>
@@ -165,7 +193,10 @@ export function TodayPage(): ReactElement {
           {!loading && error === null && tasks.length > 0 ? (
             <div className="today-page__list">
               {tasks.map((task) => (
-                <article key={task.id} className="today-task-card">
+                <article
+                  key={task.id}
+                  className={`today-task-card ${focus.isTaskInFocus(task.id) ? 'today-task-card--in-focus' : ''}`}
+                >
                   <div className="today-task-card__content">
                     <h4>{task.title}</h4>
                     {task.dueAt !== null ? <p>Due {formatDueDate(task.dueAt)}</p> : null}
@@ -203,12 +234,12 @@ export function TodayPage(): ReactElement {
                       size="small"
                       expand={undefined}
                       color="default"
-                      disabled={actionTaskId === task.id}
+                      disabled={actionTaskId === task.id || focus.actionLoading}
                       className={undefined}
                       aria-label={undefined}
-                      onClick={() => onStartFocus(task)}
+                      onClick={() => onFocusTaskAction(task)}
                     >
-                      Start focus
+                      {focus.isTaskInFocus(task.id) ? 'Stop focus' : 'Start focus'}
                     </Button>
                   </div>
                 </article>

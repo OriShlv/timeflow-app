@@ -91,6 +91,11 @@
   border: 1px solid var(--tf-border);
 }
 
+.task-card--in-focus {
+  border-color: var(--tf-primary);
+  box-shadow: var(--tf-shadow-card), 0 0 0 1px color-mix(in srgb, var(--tf-primary) 20%, transparent);
+}
+
 .task-card-status {
   width: 4px;
   flex-shrink: 0;

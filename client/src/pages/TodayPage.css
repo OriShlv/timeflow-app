@@ -67,6 +67,11 @@
   padding: 0.75rem;
 }
 
+.today-task-card--in-focus {
+  border-color: var(--tf-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tf-primary) 20%, transparent);
+}
+
 .today-task-card__content h4 {
   margin: 0;
   color: var(--tf-text);

@@ -33,6 +33,18 @@ function buildQuery(params: ListFocusSessionsParams): string {
   return `?${qs}`;
 }
 
+export async function getRunningFocusSession(): Promise<FocusSession | null> {
+  const result = await listFocusSessions({
+    status: 'RUNNING',
+    page: 1,
+    pageSize: 1,
+  });
+  if (result.items.length === 0) {
+    return null;
+  }
+  return result.items[0];
+}
+
 export async function listFocusSessions(params: ListFocusSessionsParams): Promise<ListFocusSessionsResult> {
   const response = await apiRequest<{ ok: boolean } & ListFocusSessionsResult>({
     method: 'GET',
@@ -59,11 +71,12 @@ export async function startFocusSession(taskId: string | undefined): Promise<Foc
   return response.session;
 }
 
-export async function stopFocusSession(id: string): Promise<FocusSession> {
+export async function stopFocusSession(id: string, endedAt: string | undefined): Promise<FocusSession> {
+  const body = endedAt === undefined ? {} : { endedAt };
   const response = await apiRequest<{ ok: boolean; session: FocusSession }>({
     method: 'POST',
     path: `/focus-sessions/${id}/stop`,
-    body: {},
+    body,
     includeAuth: true,
   });
   return response.session;

@@ -11,7 +11,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Button, Searchbar, Select } from '../../components/ui';
 import type { SelectOption } from '../../components/ui/Select';
 import { toUiErrorMessage } from '../../lib/apiFeedback';
-import { startFocusSession } from '../../lib/focusSessionsApi';
+import { useFocusSession } from '../../lib/FocusSessionContext';
 import { getTasks } from '../../lib/tasksApi';
 import { updateTask } from '../../lib/tasksApi';
 import type { ListTasksParams, Task, TaskStatus } from '../../lib/types';
@@ -88,6 +88,7 @@ function buildParams(
 
 export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
   function TasksList(props, ref): ReactElement {
+    const focus = useFocusSession();
     const [searchParams] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<TaskStatus | ''>(
@@ -200,14 +201,38 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
 
     const onStartFocus = useCallback((task: Task): void => {
       setActionLoadingId(task.id);
-      startFocusSession(task.id)
+      focus
+        .startFocus(task.id, task.title)
         .catch((err: unknown) => {
           setError(toUiErrorMessage(err));
         })
         .finally(() => {
           setActionLoadingId(null);
         });
-    }, []);
+    }, [focus]);
+
+    const onStopFocus = useCallback((): void => {
+      setActionLoadingId('focus-stop');
+      focus
+        .stopFocus()
+        .catch((err: unknown) => {
+          setError(toUiErrorMessage(err));
+        })
+        .finally(() => {
+          setActionLoadingId(null);
+        });
+    }, [focus]);
+
+    const onFocusTaskAction = useCallback(
+      (task: Task): void => {
+        if (focus.isTaskInFocus(task.id)) {
+          onStopFocus();
+          return;
+        }
+        onStartFocus(task);
+      },
+      [focus, onStartFocus, onStopFocus],
+    );
 
     const goToPage = useCallback(
       (p: number): void => {
@@ -337,7 +362,7 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
           {tasks.map((task) => (
             <article
               key={task.id}
-              className={`task-card ${task.status === 'DONE' ? 'task-done' : ''}`}
+              className={`task-card ${task.status === 'DONE' ? 'task-done' : ''} ${focus.isTaskInFocus(task.id) ? 'task-card--in-focus' : ''}`}
             >
               <div className="task-card-status" data-status={task.status} />
               <div className="task-card-body">
@@ -385,12 +410,12 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
                       size="small"
                       expand={undefined}
                       color="default"
-                      disabled={actionLoadingId === task.id}
+                      disabled={actionLoadingId === task.id || focus.actionLoading}
                       className={undefined}
                       aria-label={undefined}
-                      onClick={() => onStartFocus(task)}
+                      onClick={() => onFocusTaskAction(task)}
                     >
-                      Focus
+                      {focus.isTaskInFocus(task.id) ? 'Stop focus' : 'Focus'}
                     </Button>
                     <Button
                       type="button"
