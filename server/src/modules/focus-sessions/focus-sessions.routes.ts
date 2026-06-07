@@ -16,6 +16,7 @@ import {
   startFocusSession,
   stopFocusSession,
 } from './focus-sessions.service';
+import { getRequiredRouteParam } from '../../app/routing/route-params';
 
 export const focusSessionsRouter = Router();
 focusSessionsRouter.use(requireAuth);
@@ -68,9 +69,10 @@ focusSessionsRouter.post('/start', async (req: AuthedRequest, res, next) => {
 focusSessionsRouter.post('/:id/stop', async (req: AuthedRequest, res, next) => {
   try {
     const body = stopFocusSessionSchema.parse(req.body);
+    const id = getRequiredRouteParam(req.params, 'id');
     const session = await stopFocusSession({
       userId: req.user!.id,
-      focusSessionId: req.params.id,
+      focusSessionId: id,
       endedAt: body.endedAt ? new Date(body.endedAt) : new Date(),
     });
     res.json({ ok: true, session });
@@ -82,9 +84,10 @@ focusSessionsRouter.post('/:id/stop', async (req: AuthedRequest, res, next) => {
 focusSessionsRouter.post('/:id/cancel', async (req: AuthedRequest, res, next) => {
   try {
     const body = cancelFocusSessionSchema.parse(req.body);
+    const id = getRequiredRouteParam(req.params, 'id');
     const session = await cancelFocusSession({
       userId: req.user!.id,
-      focusSessionId: req.params.id,
+      focusSessionId: id,
       endedAt: body.endedAt ? new Date(body.endedAt) : new Date(),
       notes: body.notes,
     });
