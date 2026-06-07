@@ -10,6 +10,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { Button, Searchbar, Select } from '../../components/ui';
 import type { SelectOption } from '../../components/ui/Select';
+import { toUiErrorMessage } from '../../lib/apiFeedback';
 import { startFocusSession } from '../../lib/focusSessionsApi';
 import { getTasks } from '../../lib/tasksApi';
 import { updateTask } from '../../lib/tasksApi';
@@ -119,8 +120,8 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
             setTotalPages(result.totalPages);
             setLoading(false);
           })
-          .catch((err: Error) => {
-            setError(err.message);
+          .catch((err: unknown) => {
+            setError(toUiErrorMessage(err));
             setLoading(false);
           });
       },
@@ -167,9 +168,9 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
         status: 'DONE',
         dueAt: undefined,
       })
-        .catch((err: Error) => {
+        .catch((err: unknown) => {
           setTasks(previous);
-          setError(err.message);
+          setError(toUiErrorMessage(err));
         })
         .finally(() => {
           setActionLoadingId(null);
@@ -189,8 +190,8 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
         .then((updated) => {
           setTasks((items) => items.map((item) => (item.id === task.id ? updated : item)));
         })
-        .catch((err: Error) => {
-          setError(err.message);
+        .catch((err: unknown) => {
+          setError(toUiErrorMessage(err));
         })
         .finally(() => {
           setActionLoadingId(null);
@@ -200,8 +201,8 @@ export const TasksList = forwardRef<TasksListHandle, TasksListProps>(
     const onStartFocus = useCallback((task: Task): void => {
       setActionLoadingId(task.id);
       startFocusSession(task.id)
-        .catch((err: Error) => {
-          setError(err.message);
+        .catch((err: unknown) => {
+          setError(toUiErrorMessage(err));
         })
         .finally(() => {
           setActionLoadingId(null);

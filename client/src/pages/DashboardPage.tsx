@@ -7,6 +7,7 @@ import { RecommendationsList } from '../features/dashboard/RecommendationsList';
 import { SegmentBadge } from '../features/dashboard/SegmentBadge';
 import { SummaryCards } from '../features/dashboard/SummaryCards';
 import { TaskForm } from '../features/tasks/TaskForm';
+import { toUiErrorMessage } from '../lib/apiFeedback';
 import { getDailyFeatures } from '../lib/featuresApi';
 import { getDailyFocusSummary } from '../lib/focusSessionsApi';
 import { getInsights } from '../lib/insightsApi';
@@ -77,8 +78,8 @@ export function DashboardPage(): ReactElement {
         setFocusSummary(focusSummaryData);
         setTrendRows(dailyFeatures.rows);
       })
-      .catch((err: Error) => {
-        setError(err.message);
+      .catch((err: unknown) => {
+        setError(toUiErrorMessage(err));
       })
       .finally(() => {
         setLoading(false);
@@ -101,8 +102,8 @@ export function DashboardPage(): ReactElement {
         setFocusSummary(focusSummaryData);
         setTrendRows(dailyFeatures.rows);
       })
-      .catch((err: Error) => {
-        setError(err.message);
+      .catch((err: unknown) => {
+        setError(toUiErrorMessage(err));
       })
       .finally(() => setRefreshing(false));
   }, [trendRange]);

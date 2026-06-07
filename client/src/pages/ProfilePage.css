@@ -1,8 +1,3 @@
-.profile-page {
-  background: var(--tf-bg);
-  min-height: 100%;
-}
-
 .profile-page__inner {
   max-width: 720px;
   margin: 0 auto;

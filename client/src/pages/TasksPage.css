@@ -1,7 +1,4 @@
 .tasks-page {
-  background: var(--tf-bg);
   color: var(--tf-text);
-  min-height: 100%;
   padding-top: 1rem;
-  padding-bottom: 6rem;
 }

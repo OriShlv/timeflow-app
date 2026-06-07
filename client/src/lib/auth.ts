@@ -1,5 +1,5 @@
-import { getApiUrl } from './env';
-import type { AuthErrorResponse, AuthResponse, AuthUser } from './types';
+import { apiRequest } from './apiClient';
+import type { AuthResponse, AuthUser } from './types';
 
 const TOKEN_KEY = 'accessToken';
 const USER_KEY = 'user';
@@ -68,23 +68,13 @@ function setAuth(auth: AuthResponse): void {
   localStorage.setItem(USER_KEY, JSON.stringify(auth.user));
 }
 
-function parseAuthError(body: AuthErrorResponse | undefined, fallback: string): Error {
-  const message = body?.error !== undefined ? body.error : fallback;
-  return new Error(message);
-}
-
 export async function login(email: string, password: string): Promise<AuthUser> {
-  const response = await fetch(`${getApiUrl()}/auth/login`, {
+  const auth = await apiRequest<AuthResponse>({
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email.toLowerCase(), password }),
+    path: '/auth/login',
+    body: { email: email.toLowerCase(), password },
+    includeAuth: false,
   });
-
-  const body = (await response.json()) as AuthResponse | AuthErrorResponse;
-  if (!response.ok) {
-    throw parseAuthError(body as AuthErrorResponse, 'Login failed');
-  }
-  const auth = body as AuthResponse;
   setAuth(auth);
   return auth.user;
 }
@@ -102,17 +92,12 @@ export async function register(
     payload.name = name;
   }
 
-  const response = await fetch(`${getApiUrl()}/auth/register`, {
+  const auth = await apiRequest<AuthResponse>({
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    path: '/auth/register',
+    body: payload,
+    includeAuth: false,
   });
-
-  const body = (await response.json()) as AuthResponse | AuthErrorResponse;
-  if (!response.ok) {
-    throw parseAuthError(body as AuthErrorResponse, 'Registration failed');
-  }
-  const auth = body as AuthResponse;
   setAuth(auth);
   return auth.user;
 }

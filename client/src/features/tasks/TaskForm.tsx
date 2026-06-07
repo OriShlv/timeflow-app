@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent, type ReactElement } f
 
 import { Button, ConfirmDialog, Input, Select, Textarea } from '../../components/ui';
 import type { SelectOption } from '../../components/ui/Select';
+import { toUiErrorMessage } from '../../lib/apiFeedback';
 import { createTask, updateTask } from '../../lib/tasksApi';
 import type { Task, TaskStatus } from '../../lib/types';
 import './TaskForm.css';
@@ -114,8 +115,8 @@ export function TaskForm(props: TaskFormProps): ReactElement {
           setSaving(false);
           props.onSaved();
         })
-        .catch((err: Error) => {
-          setErrorMessage(err.message);
+        .catch((err: unknown) => {
+          setErrorMessage(toUiErrorMessage(err));
           setSaving(false);
         });
     } else {
@@ -128,8 +129,8 @@ export function TaskForm(props: TaskFormProps): ReactElement {
           setSaving(false);
           props.onSaved();
         })
-        .catch((err: Error) => {
-          setErrorMessage(err.message);
+        .catch((err: unknown) => {
+          setErrorMessage(toUiErrorMessage(err));
           setSaving(false);
         });
     }

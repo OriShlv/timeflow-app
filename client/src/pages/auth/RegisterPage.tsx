@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Button, Input } from '../../components/ui';
+import { toUiErrorMessage } from '../../lib/apiFeedback';
 import { useAuth } from '../../lib/AuthContext';
 import './AuthPage.css';
 
@@ -48,8 +49,7 @@ export function RegisterPage(): ReactElement {
       navigate('/today', { replace: true });
     } catch (err: unknown) {
       setLoading(false);
-      const message = err instanceof Error ? err.message : 'Registration failed';
-      setErrorMessage(message);
+      setErrorMessage(toUiErrorMessage(err));
     }
   };
 

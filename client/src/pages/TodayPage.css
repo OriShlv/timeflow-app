@@ -1,8 +1,3 @@
-.today-page {
-  background: var(--tf-bg);
-  min-height: 100%;
-}
-
 .today-page__inner {
   max-width: 960px;
   margin: 0 auto;

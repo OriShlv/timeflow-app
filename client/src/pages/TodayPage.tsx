@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '../components/ui';
+import { toUiErrorMessage } from '../lib/apiFeedback';
 import { startFocusSession } from '../lib/focusSessionsApi';
 import { getTasks, updateTask } from '../lib/tasksApi';
 import type { Task } from '../lib/types';
@@ -47,8 +48,8 @@ export function TodayPage(): ReactElement {
         const urgentTasks = result.items.filter((task) => isUrgentTask(task)).slice(0, 5);
         setTasks(urgentTasks);
       })
-      .catch((err: Error) => {
-        setError(err.message);
+      .catch((err: unknown) => {
+        setError(toUiErrorMessage(err));
       })
       .finally(() => {
         setLoading(false);
@@ -70,8 +71,8 @@ export function TodayPage(): ReactElement {
       .then(() => {
         setTasks((current) => current.filter((item) => item.id !== task.id));
       })
-      .catch((err: Error) => {
-        setError(err.message);
+      .catch((err: unknown) => {
+        setError(toUiErrorMessage(err));
       })
       .finally(() => {
         setActionTaskId(null);
@@ -91,8 +92,8 @@ export function TodayPage(): ReactElement {
       .then(() => {
         setTasks((current) => current.filter((item) => item.id !== task.id));
       })
-      .catch((err: Error) => {
-        setError(err.message);
+      .catch((err: unknown) => {
+        setError(toUiErrorMessage(err));
       })
       .finally(() => {
         setActionTaskId(null);
@@ -105,8 +106,8 @@ export function TodayPage(): ReactElement {
       .then(() => {
         navigate('/tasks');
       })
-      .catch((err: Error) => {
-        setError(err.message);
+      .catch((err: unknown) => {
+        setError(toUiErrorMessage(err));
       })
       .finally(() => {
         setActionTaskId(null);

@@ -3,6 +3,7 @@ import { useCallback, useRef, useState, type ReactElement } from 'react';
 import { ConfirmDialog, Fab, Modal, Toast } from '../components/ui';
 import { TaskForm } from '../features/tasks/TaskForm';
 import { TasksList, type TasksListHandle } from '../features/tasks/TasksList';
+import { toUiErrorMessage } from '../lib/apiFeedback';
 import { deleteTask } from '../lib/tasksApi';
 import type { Task } from '../lib/types';
 import './TasksPage.css';
@@ -60,7 +61,8 @@ export function TasksPage(): ReactElement {
             setTaskToDelete(null);
             listRef.current?.reload();
           })
-          .catch(() => {
+          .catch((err: unknown) => {
+            setToastMessage(toUiErrorMessage(err));
             setTaskToDelete(null);
           });
       }

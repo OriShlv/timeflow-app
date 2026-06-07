@@ -1,8 +1,5 @@
 .dashboard-page {
-  background: var(--tf-bg);
   color: var(--tf-text);
-  min-height: 100%;
-  padding-bottom: 6rem;
 }
 
 .dashboard-inner {
