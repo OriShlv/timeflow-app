@@ -1,165 +1,172 @@
-## TimeFlow
+# TimeFlow
 
-TimeFlow is a full-stack daily planning app with a React client, an event-driven API, and Python analytics workers.
-The product currently ships a mobile-first UX loop: **capture tasks -> execute with focus sessions -> review insights -> adjust plan**.
+Daily planning app with a mobile-first UX loop: **capture tasks → execute with focus sessions → review insights → adjust plan**.
 
-### Key capabilities
-- **Today command center**: Urgent tasks, quick actions (`Mark done`, `Snooze`, `Start focus`), and focus-session controls.
-- **Task execution workspace**: Search/filter/sort, CRUD, optimistic status updates, pagination, and empty-state guidance.
-- **Insights workspace**: Segment badge, recommendations with deep-link actions, 7/30-day trends, and freshness status.
-- **Focus session tracking**: Start/stop/cancel sessions per task, active timers in shell UI, and daily focus summary.
-- **Event-driven analytics**: Task and focus outcomes feed Redis Streams and Python workers for derived insights.
+Monorepo layout: React client, Bun/Express API, and Python analytics workers over PostgreSQL + Redis Streams.
 
----
+| Layer | Stack |
+|-------|-------|
+| Client | React 19, Vite, TypeScript, Tailwind CSS |
+| Server | Bun, Express, Prisma, Zod, JWT |
+| Workers | Python 3.11+, SQLAlchemy, Redis Streams |
+| Infra | Docker Compose (Postgres 17, Redis 7) |
 
-## Architecture
+## Table of contents
 
-- **`client/`** – React + Vite + TypeScript
-  - Auth flows (`/login`, `/register`) with guarded app routes.
-  - Main app shell with tabs: `Today`, `Tasks`, `Insights`, `Profile`.
-  - Shared UI primitives (`Button`, `Modal`, `Toast`, etc.) and focus-session context.
-- **`server/`** – Bun runtime API (TypeScript, Express, Prisma)
-  - Route groups: auth, users, tasks, focus sessions, analytics, features, segment, recommendations, insights, ops.
-  - Centralized error handling and HTTP logging with `pino-http`.
-  - PostgreSQL via Prisma and Redis Streams for event pipelines.
-- **`python-workers/`** – Python analytics workers
-  - Realtime consumer updates derived features/segments.
-  - Batch jobs compute daily stats, features, recommendations, and clustering outputs.
-- **`docker-compose.yml`** – Local infra
-  - PostgreSQL + Redis for development and integration tests.
+- [Features](#features)
+- [Repository layout](#repository-layout)
+- [Quick start](#quick-start)
+- [Manual setup](#manual-setup)
+- [Local URLs](#local-urls)
+- [Documentation](#documentation)
+- [Design goals](#design-goals)
 
-This layout is meant to mirror a realistic service: a typed HTTP API, background workers, and explicit operational surfaces.
+## Features
 
----
+- **Today** — urgent task shortlist, one-tap actions (`Mark done`, `Snooze`, `Start focus`), focus-session controls
+- **Tasks** — search, filter, sort, CRUD, optimistic updates, pagination
+- **Insights** — segment badge, recommendations with deep links, 7/30-day trends, freshness status
+- **Focus sessions** — start/stop/cancel per task, active timer in shell, daily focus summary
+- **Planner agent** — LLM-assisted planning via Ollama (optional; see [server env](#environment-variables))
+- **Event pipeline** — task and focus outcomes published to Redis Streams; Python workers derive analytics
 
-## Tech stack
-- **Language / runtime**: Bun, TypeScript
-- **Web framework**: Express
-- **ORM / DB access**: Prisma (PostgreSQL)
-- **Messaging / streaming**: Redis Streams (`ioredis`)
-- **Auth & security**: JWT, bcrypt, helmet, CORS
-- **Validation**: Zod
-- **Logging**: pino / pino‑http
-- **Infra / tooling**: Docker Compose (Postgres + Redis)
-- **Workers**: Python (for analytics + real‑time workers)
+## Repository layout
 
----
-
-## Getting started
-
-### 1) Start infrastructure
-
-```bash
-docker compose up -d
+```
+timeflow-app/
+├── client/           # React SPA → see client/README.md
+├── server/           # Bun HTTP API → see server/README.md
+├── python-workers/   # Analytics workers → see python-workers/README.md
+├── docs/             # Contracts and specs
+├── scripts/dev.ts    # One-command local dev orchestrator
+└── docker-compose.yml
 ```
 
-This starts Postgres and Redis for local development.
+## Quick start
 
-### 2) Run the server (Bun API)
+**Prerequisites:** [Bun](https://bun.sh) 1.1+, [Docker](https://www.docker.com/), Python 3.11+ (for workers).
 
 ```bash
-cd server
-cp .env.example .env   # or create .env with DATABASE_URL and REDIS_URL
-bun install
-bunx prisma migrate dev
+# 1. Infrastructure
+docker compose up -d
+
+# 2. Server
+cd server && cp .env.example .env && bun install && bun run db:migrate
+cd ..
+
+# 3. Client
+cd client && cp .env.example .env && bun install
+cd ..
+
+# 4. Workers (optional but needed for live insights)
+cd python-workers && cp .env.example .env
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.lock.txt
+cd ..
+
+# 5. Run everything (API + Vite + realtime worker)
 bun run dev
 ```
 
-The API will be available on `http://localhost:<PORT>` (see `server/src/config/env.ts` for the exact port).
+Flags: `bun run dev -- --no-docker` (skip compose), `bun run dev -- --no-workers` (API + client only).
 
-### 3) Run the client (React app)
+Root scripts:
+
+| Script | Description |
+|--------|-------------|
+| `bun run dev` | Start docker, server, client, realtime worker |
+| `bun run dev:demo` | Seed demo data (server) |
+| `bun run db:reset:demo` | Reset DB and re-seed demo data |
+| `bun run seed:recommendations` | Seed recommendation fixtures |
+
+## Manual setup
+
+Run services individually when you need finer control.
+
+### Server
+
+```bash
+cd server
+bun install
+bun run db:migrate    # or: bun run dev:demo
+bun run dev           # http://localhost:3000
+```
+
+### Client
 
 ```bash
 cd client
 bun install
-bun run dev
+bun run dev           # http://localhost:5173
 ```
 
-Client app default: `http://localhost:5173`.
-
-### 4) Run the Python workers (optional but recommended)
+### Python workers
 
 ```bash
 cd python-workers
-cp .env.example .env   # configure DATABASE_URL / REDIS_URL as needed
-python -m venv .venv
-source .venv/bin/activate      # On Windows: .venv\Scripts\activate
-pip install -r requirements.lock.txt
-```
-
-Now you can run the workers, for example:
-
-```bash
-# Realtime Redis Streams consumer
-python src/realtime_worker.py
-
-# Batch jobs (can be scheduled)
-python src/daily_stats.py
+source .venv/bin/activate
+python src/realtime_worker.py          # stream consumer (always-on)
+python src/daily_stats.py              # batch — schedule daily
 python src/daily_features.py
 python src/recommendations_v1.py
 python src/cluster_users.py
 ```
 
-Workers listen to Redis Streams and Postgres, compute analytics/insights, and write back to the database.
+## Local URLs
 
----
+| Service | URL | Notes |
+|---------|-----|-------|
+| Client | http://localhost:5173 | Vite dev server |
+| API | http://localhost:3000 | Default `PORT` in `server/.env` |
+| Postgres | `localhost:5432` | `timeflow` / `timeflow` |
+| Redis | `localhost:6379` | Stream: `timeflow.events` |
 
-## API surface (high-level)
+## Environment variables
 
-Some of the key route groups exposed by the server:
+Copy each package's `.env.example` to `.env`.
 
-- **Health / diagnostics**
-  - `GET /health` – service health
-  - `GET /dbcheck` – database connectivity check
-- **Auth / users**
-  - `POST /auth/login`, `POST /auth/register`
-  - `GET /me` and related user routes
-- **Tasks**
-  - `GET/POST/PATCH/DELETE /tasks`
-  - Supports filtering, sorting, and pagination
-- **Focus sessions**
-  - `POST /focus-sessions/start`
-  - `POST /focus-sessions/:id/stop`
-  - `POST /focus-sessions/:id/cancel`
-  - `GET /focus-sessions` and `GET /focus-sessions/summary/daily`
-- **Analytics & insights**
-  - `/analytics/*` – aggregate views over time usage
-  - `/insights/*` – user‑level insights and recommendations
-- **Ops**
-  - `/ops/*` – operational utilities such as DLQ inspection and replay
+| Package | Key variables |
+|---------|---------------|
+| `server/` | `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `OLLAMA_HOST`, `OLLAMA_MODEL` |
+| `client/` | `VITE_API_URL` (default `http://localhost:3000`) |
+| `python-workers/` | `DATABASE_URL`, `SQLALCHEMY_DATABASE_URL`, `REDIS_URL` |
 
-Endpoints are implemented with TypeScript, Prisma, and Zod to enforce input/output types and reduce runtime errors.
+## Documentation
 
----
+| Doc | Contents |
+|-----|----------|
+| [client/README.md](client/README.md) | Frontend routes, scripts, structure |
+| [server/README.md](server/README.md) | API setup, tests, lint |
+| [python-workers/README.md](python-workers/README.md) | Worker scripts and scheduling |
+| [docs/EVENTS_CONTRACT.md](docs/EVENTS_CONTRACT.md) | Redis Streams event schema |
+| [docs/ANALYTICS.md](docs/ANALYTICS.md) | Analytics endpoints and data pipeline |
+| [docs/UX_MAP_PHASE1_SPEC.md](docs/UX_MAP_PHASE1_SPEC.md) | Phase 1 UX specification |
 
-## UX flow (current)
+## API overview
 
-1. **Auth** -> user registers/logs in and lands on `/today`.
-2. **Today** -> urgent task shortlist + fast actions + focus panel.
-3. **Tasks** -> full task management with filters, sorting, and edit/delete.
-4. **Insights** -> recommendations, stats, trends, and focus outcomes.
-5. **Profile** -> basic identity and timezone information.
+| Group | Prefix | Purpose |
+|-------|--------|---------|
+| Health | `/health`, `/dbcheck` | Liveness and DB connectivity |
+| Auth | `/auth` | Register, login |
+| Users | `/me` | Current user profile |
+| Tasks | `/tasks` | CRUD, filter, sort, pagination |
+| Focus | `/focus-sessions` | Start/stop/cancel, daily summary |
+| Analytics | `/analytics`, `/insights` | Aggregates, trends, dashboard |
+| Planner | `/planner` | LLM planning sessions |
+| Ops | `/ops` | DLQ inspection, replay (dev-gated) |
 
-## Development workflow
+## UX flow
 
-- **Local development**
-  - `bun run dev` in `server/` runs the API with `bun --watch` and automatic reload.
-  - Python workers can be started independently and pointed at the same Redis / Postgres.
-- **Database**
-  - `bun run db:migrate` – run Prisma migrations locally.
-  - `bun run db:reset` – reset the database.
-  - `bun run dev:demo` – reset and seed demo data (see `scripts/seed-demo.js`).
-- **Build & production**
-  - `bun run build` – type-check the TypeScript sources (`tsc --noEmit`).
-  - `bun start` – run the server directly from TypeScript.
-
-Configuration is environment‑driven (`.env` files) and can be adapted to different environments.
-
----
+1. **Auth** — register or log in → land on `/today`
+2. **Dashboard** (`/dashboard`) — calendar, recommendations, shortcuts
+3. **Today** — urgent tasks and fast actions
+4. **Tasks** — full task workspace
+5. **Insights** — stats, segment, recommendations
+6. **Profile** — identity and timezone
 
 ## Design goals
 
-- **Fast execution loop** - reduce friction between task capture, focused execution, and reflection.
-- **Clear system boundaries** - transactional API paths stay responsive while analytics run asynchronously.
-- **Operational visibility** - health/db checks, structured logs, and ops routes for diagnostics and recovery.
-- **Incremental extensibility** - new UX surfaces and analytics modules can be added without breaking API compatibility.
+- **Fast execution loop** — low friction between capture, focus, and reflection
+- **Clear boundaries** — transactional API stays responsive; analytics run async
+- **Operational visibility** — health checks, structured logs, ops routes for recovery
+- **Incremental extensibility** — new surfaces and analytics without breaking the API

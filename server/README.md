@@ -1,80 +1,134 @@
-## Server (Bun API)
+# Server
 
-This directory contains the TimeFlow HTTP API implemented with **Bun + TypeScript + Express + Prisma**.
+Bun + TypeScript + Express HTTP API for TimeFlow. PostgreSQL via Prisma; Redis Streams for the event pipeline.
 
-### Prerequisites
+← [Back to root README](../README.md)
 
-- Bun 1.1+ (recommended)
-- Docker (for Postgres + Redis via the repo’s `docker-compose.yml`)
+## Table of contents
 
-### Setup
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [Scripts](#scripts)
+- [API modules](#api-modules)
+- [Project structure](#project-structure)
+- [Testing](#testing)
+- [Lint and format](#lint-and-format)
+
+## Prerequisites
+
+- [Bun](https://bun.sh) 1.1+
+- Docker — Postgres + Redis via repo-root `docker-compose.yml`
+
+## Quick start
 
 ```bash
+# From repo root
+docker compose up -d
+
 cd server
-cp .env.example .env  # configure DATABASE_URL and REDIS_URL
+cp .env.example .env
 bun install
-```
-
-Run database migrations:
-
-```bash
 bun run db:migrate
-```
-
-Optionally seed demo data:
-
-```bash
-bun run dev:demo
-```
-
-### Running the server
-
-Development mode with auto-reload:
-
-```bash
 bun run dev
 ```
 
-Type-check and run the server directly from TypeScript:
+API: http://localhost:3000 (default `PORT`).
 
-```bash
-bun run build
-bun start
+Seed demo data: `bun run dev:demo` or `bun run db:reset:demo`.
+
+## Configuration
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PORT` | No | HTTP port (default `3000`) |
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `REDIS_URL` | Yes | Redis connection string |
+| `JWT_SECRET` | Yes | Min 32 chars |
+| `JWT_EXPIRES_IN` | No | Token TTL (default `15m`) |
+| `OLLAMA_HOST` | No | Planner LLM host (default `http://127.0.0.1:11434`) |
+| `OLLAMA_MODEL` | No | Ollama model name |
+| `OPS_ENABLED` | No | Enable ops routes (default `false`) |
+| `OPS_DEV_ONLY` | No | Restrict ops to dev (default `true`) |
+| `OPS_ADMIN_EMAILS` | No | Comma-separated admin emails |
+
+Validated at startup in `src/config/env.ts`.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `bun run dev` | Dev server with `bun --watch` |
+| `bun run build` | Type-check (`tsc --noEmit`) |
+| `bun start` | Run `src/main.ts` |
+| `bun run db:migrate` | Apply Prisma migrations |
+| `bun run db:reset` | Reset database |
+| `bun run dev:demo` | Seed demo data |
+| `bun run db:reset:demo` | Reset + seed demo |
+| `bun run seed:recommendations` | Seed recommendation fixtures |
+| `bun run test:prepare` | Create `timeflow_test` DB (once) |
+| `bun run test` | Integration tests (auth, tasks) |
+
+## API modules
+
+| Mount | Module | Purpose |
+|-------|--------|---------|
+| `/health` | health | Service liveness |
+| `/dbcheck` | dbcheck | Database connectivity |
+| `/auth` | auth | Register, login |
+| `/me` | users | Current user |
+| `/tasks` | tasks | Task CRUD, events to Redis |
+| `/focus-sessions` | focus-sessions | Focus timer lifecycle |
+| `/analytics` | analytics | Summary and daily stats |
+| `/insights` | insights | Dashboard (segment + recommendations) |
+| `/recommendations` | recommendations | User recommendations |
+| `/features` | features | Daily user features |
+| `/segment` | segment | User segment |
+| `/planner` | planner | LLM planning agent |
+| `/ops` | ops | DLQ inspect/replay (gated) |
+
+## Project structure
+
+```
+src/
+├── main.ts                 # Entry point
+├── app/
+│   ├── server.ts           # Express app + route mounting
+│   ├── middleware/         # require-auth
+│   └── errors/             # HttpError, error handler
+├── config/env.ts           # Zod env validation
+├── db/                     # Prisma client
+├── events/publisher.ts     # Redis Streams publisher
+├── queue/redis.ts          # Redis connection
+├── llm/                    # Ollama client
+└── modules/                # Feature routers, services, schemas
+prisma/
+└── schema.prisma           # Data model
 ```
 
-### Integration tests
+## Testing
 
-Requires Postgres and Redis (start via `docker compose up -d postgres redis` from repo root).
+Requires Postgres and Redis:
 
 ```bash
-bun run test:prepare   # creates timeflow_test DB and runs migrations (run once)
-bun run test          # runs auth + tasks integration tests
+docker compose up -d postgres redis
+bun run test:prepare   # once
+bun run test
 ```
 
-### Linting and formatting
+Uses Vitest + Supertest against a dedicated `timeflow_test` database.
 
-This project uses **ESLint** + **Prettier** for the `src/` TypeScript code.
+## Lint and format
 
-- Lint the code:
+| Command | Description |
+|---------|-------------|
+| `bun run lint` | ESLint on `src/` |
+| `bun run lint:fix` | Auto-fix lint issues |
+| `bun run format` | Prettier write |
+| `bun run format:check` | Prettier check |
 
-  ```bash
-  bun run lint
-  ```
+## Related docs
 
-- Auto-fix lint issues:
-
-  ```bash
-  bun run lint:fix
-  ```
-
-- Format code with Prettier:
-
-  ```bash
-  bun run format
-  ```
-
-- Check formatting without writing changes:
-
-  ```bash
-  bun run format:check
-  ```
+- [Events contract](../docs/EVENTS_CONTRACT.md)
+- [Analytics pipeline](../docs/ANALYTICS.md)
+- [Python workers](../python-workers/README.md)
