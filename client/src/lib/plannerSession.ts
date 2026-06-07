@@ -1,7 +1,7 @@
 import type { PlannerChatMessage, PlannerIntent } from './plannerAgentTypes';
 
 export const MAX_PLANNER_CONTEXT_MESSAGES = 40;
-export const PLANNER_INACTIVITY_MS = 20 * 1000;
+export const PLANNER_INACTIVITY_MS = 10 * 60 * 1000; // 10 minutes
 
 export const PLANNER_QUICK_INTENT_OPTIONS: { intent: PlannerIntent; label: string }[] = [
   { intent: 'plan_day', label: 'Plan my day' },
