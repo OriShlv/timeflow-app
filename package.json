@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun scripts/dev.ts",
     "dev:demo": "bun run --cwd server dev:demo",
+    "db:reset:demo": "bun run --cwd server db:reset:demo",
     "seed:demo": "bun run --cwd server seed:demo",
     "seed:recommendations": "bun run --cwd server seed:recommendations"
   }
