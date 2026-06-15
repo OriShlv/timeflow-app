@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { Card } from '../../components/ui/Card';
-import { formatDate } from '../../lib/dateFormat';
+import { formatUtcDate } from '../../lib/dateFormat';
 import { useT } from '../../lib/i18n/I18nContext';
 import type { InsightsDaily } from '../../lib/types';
 import { useUserPreferences } from '../../lib/useUserPreferences';
@@ -12,14 +12,14 @@ export type DailyStatsProps = {
 
 export function DailyStats(props: DailyStatsProps): ReactElement | null {
   const t = useT();
-  const { timezone, language } = useUserPreferences();
+  const { language } = useUserPreferences();
 
   if (props.daily === null) {
     return null;
   }
 
   const daily = props.daily;
-  const formattedDay = formatDate(daily.day, timezone, language, {
+  const formattedDay = formatUtcDate(daily.day, language, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',

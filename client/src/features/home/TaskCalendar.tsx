@@ -1,6 +1,6 @@
 import { useMemo, type ReactElement } from 'react';
 
-import { formatDate } from '../../lib/dateFormat';
+import { dateKeyInTimezone, formatCalendarDate } from '../../lib/dateFormat';
 import { useUserPreferences } from '../../lib/useUserPreferences';
 import type { Task } from '../../lib/types';
 import './TaskCalendar.css';
@@ -16,15 +16,11 @@ export type TaskCalendarProps = {
 
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function dateKeyLocal(date: Date): string {
+function dateKeyFromCalendarDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-}
-
-function isSameDay(left: Date, right: Date): boolean {
-  return dateKeyLocal(left) === dateKeyLocal(right);
 }
 
 function buildCalendarDays(year: number, month: number): Date[] {
@@ -38,13 +34,13 @@ function buildCalendarDays(year: number, month: number): Date[] {
   return days;
 }
 
-function groupTasksByDueDate(tasks: Task[]): Map<string, Task[]> {
+function groupTasksByDueDate(tasks: Task[], timezone: string): Map<string, Task[]> {
   const grouped = new Map<string, Task[]>();
   for (const task of tasks) {
     if (task.dueAt === null) {
       continue;
     }
-    const key = dateKeyLocal(new Date(task.dueAt));
+    const key = dateKeyInTimezone(task.dueAt, timezone);
     const existing = grouped.get(key);
     if (existing === undefined) {
       grouped.set(key, [task]);
@@ -55,8 +51,8 @@ function groupTasksByDueDate(tasks: Task[]): Map<string, Task[]> {
   return grouped;
 }
 
-function monthLabel(year: number, month: number, timezone: string, language: 'en' | 'he'): string {
-  return formatDate(new Date(year, month, 1), timezone, language, { month: 'long', year: 'numeric' });
+function monthLabel(year: number, month: number, language: 'en' | 'he'): string {
+  return formatCalendarDate(new Date(year, month, 1), language, { month: 'long', year: 'numeric' });
 }
 
 function shiftMonth(year: number, month: number, delta: number): { year: number; month: number } {
@@ -64,18 +60,19 @@ function shiftMonth(year: number, month: number, delta: number): { year: number;
   return { year: next.getFullYear(), month: next.getMonth() };
 }
 
-function isOverdueTask(task: Task, today: Date): boolean {
+function isOverdueTask(task: Task, today: Date, timezone: string, todayKey: string): boolean {
   if (task.dueAt === null) {
     return false;
   }
-  const due = new Date(task.dueAt);
-  return due.getTime() < today.getTime() && !isSameDay(due, today);
+  return new Date(task.dueAt).getTime() < today.getTime() && dateKeyInTimezone(task.dueAt, timezone) !== todayKey;
 }
 
 export function TaskCalendar(props: TaskCalendarProps): ReactElement {
   const { timezone, language } = useUserPreferences();
   const today = useMemo(() => new Date(), []);
-  const tasksByDate = useMemo(() => groupTasksByDueDate(props.tasks), [props.tasks]);
+  const todayKey = dateKeyInTimezone(today, timezone);
+  const selectedDateKey = dateKeyFromCalendarDate(props.selectedDate);
+  const tasksByDate = useMemo(() => groupTasksByDueDate(props.tasks, timezone), [props.tasks, timezone]);
   const calendarDays = useMemo(
     () => buildCalendarDays(props.viewYear, props.viewMonth),
     [props.viewYear, props.viewMonth],
@@ -94,7 +91,7 @@ export function TaskCalendar(props: TaskCalendarProps): ReactElement {
   return (
     <section className="task-calendar" aria-label="Task calendar">
       <div className="task-calendar__header">
-        <h2 className="task-calendar__title">{monthLabel(props.viewYear, props.viewMonth, timezone, language)}</h2>
+        <h2 className="task-calendar__title">{monthLabel(props.viewYear, props.viewMonth, language)}</h2>
         <div className="task-calendar__nav">
           <button type="button" className="task-calendar__nav-btn" onClick={onPrevMonth} aria-label="Previous month">
             ‹
@@ -113,12 +110,12 @@ export function TaskCalendar(props: TaskCalendarProps): ReactElement {
       </div>
       <div className="task-calendar__grid">
         {calendarDays.map((day) => {
-          const key = dateKeyLocal(day);
+          const key = dateKeyFromCalendarDate(day);
           const dayTasks = tasksByDate.get(key) ?? [];
           const inCurrentMonth = day.getMonth() === props.viewMonth;
-          const isToday = isSameDay(day, today);
-          const isSelected = isSameDay(day, props.selectedDate);
-          const hasOverdue = dayTasks.some((task) => isOverdueTask(task, today));
+          const isToday = key === todayKey;
+          const isSelected = key === selectedDateKey;
+          const hasOverdue = dayTasks.some((task) => isOverdueTask(task, today, timezone, todayKey));
 
           return (
             <button
@@ -142,7 +139,7 @@ export function TaskCalendar(props: TaskCalendarProps): ReactElement {
                   {dayTasks.slice(0, 3).map((task) => (
                     <span
                       key={task.id}
-                      className={`task-calendar__marker ${isOverdueTask(task, today) || hasOverdue ? 'task-calendar__marker--overdue' : ''}`}
+                      className={`task-calendar__marker ${isOverdueTask(task, today, timezone, todayKey) || hasOverdue ? 'task-calendar__marker--overdue' : ''}`}
                     />
                   ))}
                 </span>
@@ -155,7 +152,7 @@ export function TaskCalendar(props: TaskCalendarProps): ReactElement {
   );
 }
 
-export function tasksForDate(tasks: Task[], date: Date): Task[] {
-  const key = dateKeyLocal(date);
-  return tasks.filter((task) => task.dueAt !== null && dateKeyLocal(new Date(task.dueAt)) === key);
+export function tasksForDate(tasks: Task[], date: Date, timezone: string): Task[] {
+  const key = dateKeyFromCalendarDate(date);
+  return tasks.filter((task) => task.dueAt !== null && dateKeyInTimezone(task.dueAt, timezone) === key);
 }
